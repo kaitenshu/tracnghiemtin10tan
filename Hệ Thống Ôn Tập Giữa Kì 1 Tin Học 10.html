@@ -1,0 +1,2779 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ôn Tập Giữa Kì I - Tin Học 10 (THPT Lương Thế Vinh)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.96); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop {
+            animation: popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .option-btn {
+            transition: all 0.15s ease;
+        }
+        .option-btn:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-800 h-[100dvh] w-screen overflow-hidden flex justify-center items-center">
+
+    <!-- Khung Điện Thoại Tối Ưu Hóa -->
+    <div id="app" class="w-full max-w-md h-full bg-slate-50 flex flex-col relative shadow-2xl overflow-hidden sm:rounded-3xl sm:h-[94dvh] sm:border-4 sm:border-slate-800">
+        
+        <!-- HEADER -->
+        <header id="app-header" class="bg-gradient-to-r from-indigo-600 to-blue-600 text-white px-4 py-3.5 shadow-md z-20 shrink-0">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2.5">
+                    <button id="btn-back-home" onclick="showHome()" class="hidden w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center active:bg-white/30 transition">
+                        <i class="fa-solid fa-chevron-left text-sm"></i>
+                    </button>
+                    <div>
+                        <h1 id="header-title" class="font-bold text-base leading-tight tracking-tight">Tin Học 10 • Giữa Kì I</h1>
+                        <p id="header-subtitle" class="text-[11px] text-indigo-100 font-medium">THPT Lương Thế Vinh (Đủ 179 câu)</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button id="btn-grid-drawer" onclick="toggleQuestionGrid()" class="hidden px-3 py-1.5 rounded-xl bg-white/20 text-xs font-semibold flex items-center space-x-1.5 active:bg-white/30">
+                        <i class="fa-solid fa-table-cells-large"></i>
+                        <span id="header-q-counter">1/23</span>
+                    </button>
+                    <button onclick="confirmResetProgress()" title="Xóa tiến độ" class="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center active:bg-white/30 text-white/90">
+                        <i class="fa-solid fa-rotate-right text-sm"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- Thanh tiến độ khi làm bài -->
+            <div id="quiz-progress-bar-wrap" class="hidden mt-2.5 w-full bg-indigo-900/40 h-1.5 rounded-full overflow-hidden">
+                <div id="quiz-progress-bar" class="bg-emerald-400 h-full transition-all duration-300 w-0"></div>
+            </div>
+        </header>
+
+        <!-- MAIN VIEW: CHỌN LEVEL -->
+        <main id="view-home" class="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar">
+            
+            <!-- Thống kê tổng quan -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-semibold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-md">Tổng tiến độ</span>
+                    <div class="mt-2 flex items-baseline space-x-2">
+                        <span id="stat-total-done" class="text-2xl font-extrabold text-slate-800">0</span>
+                        <span class="text-sm text-slate-500 font-medium">/ 159 câu trắc nghiệm</span>
+                    </div>
+                    <p id="stat-accuracy" class="text-xs text-slate-500 mt-0.5">Tỉ lệ chính xác: <strong class="text-emerald-600">0%</strong></p>
+                </div>
+                <div class="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 text-2xl font-bold" id="stat-percent-circle">
+                    0%
+                </div>
+            </div>
+
+            <!-- Tabs Chuyển Phần -->
+            <div class="grid grid-cols-3 gap-1.5 bg-slate-200/80 p-1 rounded-2xl">
+                <button onclick="switchCategoryTab('mcq')" id="tab-mcq" class="py-2.5 px-2 rounded-xl text-xs font-bold transition shadow-sm bg-white text-indigo-600">
+                    4 Đáp Án (129)
+                </button>
+                <button onclick="switchCategoryTab('tf')" id="tab-tf" class="py-2.5 px-2 rounded-xl text-xs font-bold transition text-slate-600">
+                    Đúng / Sai (30)
+                </button>
+                <button onclick="switchCategoryTab('essay')" id="tab-essay" class="py-2.5 px-2 rounded-xl text-xs font-bold transition text-slate-600">
+                    Tự Luận (20)
+                </button>
+            </div>
+
+            <!-- Danh sách Level -->
+            <div id="levels-container" class="space-y-3 pb-6"></div>
+        </main>
+
+        <!-- QUIZ VIEW: MÀN HÌNH CÂU HỎI CHUYỂN TRANG (KHÔNG CUỘN TRANG) -->
+        <main id="view-quiz" class="hidden flex-1 flex flex-col justify-between overflow-hidden bg-slate-50">
+            
+            <!-- Vùng nội dung câu hỏi (Tự co giãn hoặc cuộn nội bộ nhẹ nếu câu quá dài) -->
+            <div id="question-stage" class="flex-1 overflow-y-auto p-4 space-y-3.5 no-scrollbar flex flex-col justify-between">
+                
+                <!-- Nội dung câu hỏi -->
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span id="q-badge-type" class="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-indigo-100 text-indigo-700">
+                            Câu 1
+                        </span>
+                        <span id="q-status-badge" class="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-slate-200 text-slate-600">
+                            Chưa trả lời
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/90">
+                        <p id="q-text" class="text-slate-800 font-semibold text-[15px] leading-relaxed select-text"></p>
+                    </div>
+                </div>
+
+                <!-- Vùng Đáp Án (4 Đáp án hoặc 4 mệnh đề Đúng/Sai) -->
+                <div id="q-options-container" class="space-y-2.5 my-auto py-1"></div>
+
+                <!-- Thông báo kết quả ngay sau mỗi câu -->
+                <div id="q-feedback-box" class="hidden p-3.5 rounded-2xl border text-xs leading-relaxed animate-pop"></div>
+            </div>
+
+            <!-- Thanh Điều Hướng Chuyển Trang Cố Định Dưới Đáy -->
+            <footer class="bg-white border-t border-slate-200 px-4 py-3 shrink-0 flex items-center justify-between gap-2.5 z-10">
+                <button id="btn-prev-q" onclick="navigateQuestion(-1)" class="px-4 py-3 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs flex items-center space-x-1.5 active:bg-slate-200 disabled:opacity-40 transition">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>Câu trước</span>
+                </button>
+
+                <button id="btn-submit-tf" onclick="submitTrueFalseQuestion()" class="hidden flex-1 py-3 rounded-xl bg-indigo-600 text-white font-bold text-xs shadow-md shadow-indigo-200 active:bg-indigo-700 transition">
+                    Kiểm tra Đúng / Sai
+                </button>
+
+                <button id="btn-retry-q" onclick="retryCurrentQuestion()" class="hidden px-3.5 py-3 rounded-xl bg-amber-100 text-amber-800 font-bold text-xs active:bg-amber-200 transition" title="Làm lại câu này">
+                    <i class="fa-solid fa-rotate-left mr-1"></i>Làm lại
+                </button>
+
+                <button id="btn-next-q" onclick="navigateQuestion(1)" class="flex-1 py-3 px-4 rounded-xl bg-indigo-600 text-white font-bold text-xs flex items-center justify-center space-x-1.5 shadow-md shadow-indigo-200 active:bg-indigo-700 transition">
+                    <span id="btn-next-label">Câu tiếp</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </footer>
+        </main>
+
+        <!-- SUMMARY VIEW: KẾT QUẢ LEVEL -->
+        <main id="view-summary" class="hidden flex-1 flex flex-col justify-center items-center p-6 text-center space-y-5 bg-white">
+            <div id="summary-icon" class="w-20 h-20 rounded-3xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-4xl shadow-inner">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+            <div>
+                <h2 id="summary-title" class="text-xl font-extrabold text-slate-800">Hoàn thành Level!</h2>
+                <p id="summary-subtitle" class="text-xs text-slate-500 mt-1">Bài 1: Thông tin và xử lí thông tin</p>
+            </div>
+            <div class="w-full bg-slate-50 p-4 rounded-2xl border border-slate-200 grid grid-cols-3 gap-2">
+                <div>
+                    <p class="text-[11px] text-slate-400 font-semibold uppercase">Tổng số</p>
+                    <p id="sum-total" class="text-lg font-extrabold text-slate-700 mt-0.5">23</p>
+                </div>
+                <div class="border-x border-slate-200">
+                    <p class="text-[11px] text-emerald-600 font-semibold uppercase">Chính xác</p>
+                    <p id="sum-correct" class="text-lg font-extrabold text-emerald-600 mt-0.5">20</p>
+                </div>
+                <div>
+                    <p class="text-[11px] text-indigo-600 font-semibold uppercase">Điểm số</p>
+                    <p id="sum-score" class="text-lg font-extrabold text-indigo-600 mt-0.5">8.7</p>
+                </div>
+            </div>
+            <div class="w-full space-y-2.5 pt-2">
+                <button onclick="resetCurrentLevel()" class="w-full py-3.5 rounded-xl bg-indigo-600 text-white font-bold text-sm shadow-lg shadow-indigo-200 active:bg-indigo-700 transition">
+                    <i class="fa-solid fa-rotate mr-1.5"></i>Làm lại Level này
+                </button>
+                <button onclick="showHome()" class="w-full py-3.5 rounded-xl bg-slate-100 text-slate-700 font-bold text-sm active:bg-slate-200 transition">
+                    Chọn Level khác
+                </button>
+            </div>
+        </main>
+
+        <!-- DRAWER: DANH SÁCH CÂU HỎI NHANH -->
+        <div id="drawer-grid" class="hidden absolute inset-0 bg-slate-900/60 z-30 flex flex-col justify-end">
+            <div class="bg-white rounded-t-3xl p-4 max-h-[75%] flex flex-col animate-pop">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <div>
+                        <h3 class="font-bold text-sm text-slate-800">Chuyển nhanh câu hỏi</h3>
+                        <p class="text-[11px] text-slate-400">Chạm vào số câu để chuyển trang ngay</p>
+                    </div>
+                    <button onclick="toggleQuestionGrid()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="flex items-center space-x-4 py-2.5 text-[11px] font-medium text-slate-600">
+                    <span class="flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 mr-1.5"></span>Đúng</span>
+                    <span class="flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 mr-1.5"></span>Sai / Chưa trọn vẹn</span>
+                    <span class="flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-slate-200 mr-1.5"></span>Chưa làm</span>
+                </div>
+                <div id="grid-numbers" class="grid grid-cols-6 gap-2 overflow-y-auto py-2 no-scrollbar"></div>
+            </div>
+        </div>
+
+        <!-- MODAL XÁC NHẬN XÓA TIẾN ĐỘ -->
+        <div id="modal-reset" class="hidden absolute inset-0 bg-slate-900/60 z-40 flex items-center justify-center p-5">
+            <div class="bg-white rounded-2xl p-5 w-full max-w-xs text-center space-y-4 animate-pop shadow-xl">
+                <div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 mx-auto flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-trash-can"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-slate-800 text-base">Xóa toàn bộ tiến độ?</h3>
+                    <p class="text-xs text-slate-500 mt-1">Tất cả kết quả các câu đã làm sẽ được đặt lại từ đầu.</p>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="closeResetModal()" class="py-2.5 rounded-xl bg-slate-100 text-slate-700 font-semibold text-xs">Hủy</button>
+                    <button onclick="executeResetAll()" class="py-2.5 rounded-xl bg-rose-600 text-white font-semibold text-xs">Xóa hết</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // ============================================================================
+        // TOÀN BỘ DỮ LIỆU ĐỀ CƯƠNG ÔN TẬP GIỮA KÌ I - TIN HỌC 10 (KHÔNG CẮT GIẢM)
+        // Gồm: 129 câu Trắc nghiệm 4 lựa chọn + 30 câu Đúng/Sai (120 ý) + 20 câu Tự luận
+        // ============================================================================
+        const QUIZ_LEVELS = [
+            // ==================== PHẦN I: TRẮC NGHIỆM 4 ĐÁP ÁN ====================
+            {
+                id: 'p1_b1',
+                category: 'mcq',
+                levelBadge: 'Level 1 • Bài 1',
+                title: 'Thông tin và xử lí thông tin',
+                subtitle: '23 câu trắc nghiệm 4 đáp án',
+                icon: 'fa-microchip',
+                color: 'indigo',
+                questions: [
+                    {
+                        num: 1,
+                        q: 'Câu 1. Thông tin khi đưa vào máy tính, chúng đều được biến đổi thành dạng chung đó là:',
+                        options: ['Văn bản.', 'Âm thanh.', 'Hình ảnh.', 'Dãy bit.'],
+                        ans: 3,
+                        exp: 'Mọi thông tin khi đưa vào máy tính đều được mã hóa thành dãy bit (gồm các ký hiệu 0 và 1).'
+                    },
+                    {
+                        num: 2,
+                        q: 'Câu 2. Quá trình xử lí thông tin gồm các bước nào?',
+                        options: [
+                            'Tiếp nhận dữ liệu, xử lí dữ liệu, đưa ra kết quả.',
+                            'Tiếp nhận thông tin, xử lí thông tin, đưa ra kết quả.',
+                            'Tiếp nhận thông tin, chuyển thành dữ liệu, tính toán dữ liệu, đưa ra kết quả.',
+                            'Xử lí thông tin, đưa ra kết quả, tiếp nhận thông tin.'
+                        ],
+                        ans: 0,
+                        exp: 'Quá trình xử lí thông tin trong máy tính gồm 3 bước: Tiếp nhận dữ liệu -> Xử lí dữ liệu -> Đưa ra kết quả.'
+                    },
+                    {
+                        num: 3,
+                        q: 'Câu 3. Thông tin là gì?',
+                        options: [
+                            'Các văn bản và số liệu.',
+                            'Tất cả những gì mang lại cho chúng ta hiểu biết.',
+                            'Văn bản, hình ảnh, âm thanh.',
+                            'Hình ảnh, âm thanh.'
+                        ],
+                        ans: 1,
+                        exp: 'Thông tin là tất cả những gì mang lại hiểu biết cho con người.'
+                    },
+                    {
+                        num: 4,
+                        q: 'Câu 4. Chọn câu đúng trong các câu sau:',
+                        options: ['1MB = 1024KB.', '1PB = 1024 GB.', '1ZB = 1024PB.', '1Bit = 1024B.'],
+                        ans: 0,
+                        exp: 'Theo quy ước đơn vị lưu trữ: 1 MB = 1024 KB (1 PB = 1024 TB, 1 ZB = 1024 EB, 1 Byte = 8 bit).'
+                    },
+                    {
+                        num: 5,
+                        q: 'Câu 5. Phát biểu nào sau đây là sai khi nói về quan hệ giữa thông tin và dữ liệu?',
+                        options: [
+                            'Dữ liệu là thông tin đã được đưa vào máy tính.',
+                            'Thông tin là ý nghĩa của dữ liệu.',
+                            'Thông tin và dữ liệu có tính độc lập tương đối.',
+                            'Thông tin không có tính toàn vẹn.'
+                        ],
+                        ans: 3,
+                        exp: 'Phát biểu sai là "Thông tin không có tính toàn vẹn".'
+                    },
+                    {
+                        num: 6,
+                        q: 'Câu 6. Phát biểu nào sau đây là phù hợp nhất về khái niệm bit?',
+                        options: [
+                            'Chính là chữ số 1.',
+                            'Một số có 1 chữ số.',
+                            'Đơn vị đo khối lượng kiến thức.',
+                            'Đơn vị đo lượng thông tin.'
+                        ],
+                        ans: 3,
+                        exp: 'Bit là đơn vị nhỏ nhất dùng để đo lượng thông tin.'
+                    },
+                    {
+                        num: 7,
+                        q: 'Câu 7. Đơn vị nào sau đây là đơn vị đo dung lượng lưu trữ lớn nhất?',
+                        options: ['Yottabyte (YB)', 'Kilobyte (KB)', 'Terabyte (TB)', 'Megabyte (MB)'],
+                        ans: 0,
+                        exp: 'Thứ tự tăng dần: B < KB < MB < GB < TB < PB < EB < ZB < YB (Yottabyte là lớn nhất).'
+                    },
+                    {
+                        num: 8,
+                        q: 'Câu 8. Đơn vị đo lượng thông tin cơ sở là:',
+                        options: ['Bit.', 'GHz.', 'GB.', 'Byte.'],
+                        ans: 3,
+                        exp: 'Theo SGK Tin học 10, đơn vị đo dung lượng thông tin cơ sở là Byte (1 Byte = 8 bit), các bội số là KB, MB, GB...'
+                    },
+                    {
+                        num: 9,
+                        q: 'Câu 9: Phát biểu nào sau đây đúng về bit?',
+                        options: [
+                            'Bit là đơn vị đo tốc độ xử lý của máy tính.',
+                            'Bit chỉ có thể nhận giá trị 0 hoặc 1.',
+                            'Bit là đơn vị đo dung lượng của bộ nhớ.',
+                            'Bit là một loại dữ liệu phức tạp.'
+                        ],
+                        ans: 1,
+                        exp: 'Mỗi bit (binary digit) chỉ nhận một trong hai giá trị là 0 hoặc 1.'
+                    },
+                    {
+                        num: 10,
+                        q: 'Câu 10. Chọn câu đúng trong các câu dưới đây?',
+                        options: [
+                            'Dữ liệu là thông tin đã được đưa vào trong máy tính.',
+                            'CPU là vùng nhớ đóng vai trò trung gian giữa bộ nhớ và các thanh ghi.',
+                            'Đĩa cứng là bộ nhớ trong.',
+                            '8 bytes = 1 bit.'
+                        ],
+                        ans: 0,
+                        exp: 'Khi đưa vào máy tính để lưu trữ và xử lí, thông tin được gọi là dữ liệu.'
+                    },
+                    {
+                        num: 11,
+                        q: 'Câu 11: Chọn câu sai:',
+                        options: ['1 KB = 1024 B.', '1 MB = 1024 KB.', '1 GB = 1024 MB.', '1 Byte = 1024 bit.'],
+                        ans: 3,
+                        exp: '1 Byte = 8 bit (không phải 1024 bit).'
+                    },
+                    {
+                        num: 12,
+                        q: 'Câu 12: [VD] Một thẻ nhớ có dung lượng 16 GB. Nếu kích thước trung bình của một bức ảnh là khoảng 10.000 KB, thẻ nhớ này có thể chứa được khoảng bao nhiêu ảnh?',
+                        options: ['Khoảng 160 ảnh.', 'Khoảng 1.600 ảnh.', 'Khoảng 16.000 ảnh.', 'Khoảng 16 ảnh.'],
+                        ans: 1,
+                        exp: '16 GB = 16 × 1024 × 1024 KB ≈ 16.777.216 KB. Chia cho 10.000 KB/ảnh được khoảng 1.677 ảnh (xấp xỉ 1.600 ảnh).'
+                    },
+                    {
+                        num: 13,
+                        q: 'Câu 13: [TH] Bạn của bạn gửi một tin nhắn chỉ có con số "18". Để hiểu được "thông tin", bạn cần thêm yếu tố nào?',
+                        options: [
+                            'Thời gian tin nhắn được gửi.',
+                            'Nhãn hiệu điện thoại của bạn bạn.',
+                            'Ngữ cảnh của cuộc trò chuyện.',
+                            'Phông chữ của con số.'
+                        ],
+                        ans: 2,
+                        exp: 'Dữ liệu "18" cần đặt trong ngữ cảnh cụ thể (tuổi, giờ hẹn, nhiệt độ...) mới mang lại thông tin rõ ràng.'
+                    },
+                    {
+                        num: 14,
+                        q: 'Câu 14: Tại sao cùng một dữ liệu "39°C" lại có thể mang những thông tin khác nhau?',
+                        options: [
+                            'Vì số 39 là một số nguyên tố.',
+                            'Vì thang đo Celsius không đủ chính xác.',
+                            'Vì máy tính xử lí nó khác nhau mỗi lần.',
+                            'Vì thông tin phụ thuộc vào ngữ cảnh của dữ liệu.'
+                        ],
+                        ans: 3,
+                        exp: 'Nếu là thân nhiệt người thì 39°C báo hiệu bị sốt, nếu là nhiệt độ thời tiết mùa hè thì báo hiệu trời nắng nóng.'
+                    },
+                    {
+                        num: 15,
+                        q: 'Câu 15: [TH] Ưu điểm chính của việc lưu trữ thông tin bằng thiết bị số so với các phương pháp truyền thống (ví dụ: sách trong thư viện) là gì?',
+                        options: [
+                            'Thông tin số không bao giờ bị mất.',
+                            'Phương pháp truyền thống truy cập nhanh hơn.',
+                            'Lưu trữ một lượng thông tin khổng lồ trong một không gian rất nhỏ gọn.',
+                            'Thiết bị số luôn rẻ hơn.'
+                        ],
+                        ans: 2,
+                        exp: 'Thiết bị số giúp lưu trữ lượng dữ liệu cực lớn trong kích thước nhỏ gọn, dễ tìm kiếm và sao chép.'
+                    },
+                    {
+                        num: 16,
+                        q: 'Câu 16: Thiết bị nào sau đây là thiết bị số?',
+                        options: ['Đồng hồ cơ.', 'Máy tính xách tay.', 'Đĩa than.', 'Bút bi.'],
+                        ans: 1,
+                        exp: 'Máy tính xách tay (Laptop) là thiết bị số lưu trữ và xử lí dữ liệu nhị phân.'
+                    },
+                    {
+                        num: 17,
+                        q: 'Câu 17: [VD] Một thư viện có khoảng 2100 cuốn sách. Nếu số hoá một cuốn sách cần khoảng 60 MB dữ liệu, cần khoảng bao nhiêu Gigabyte (GB) để lưu trữ toàn bộ thư viện này?',
+                        options: ['10 GB', '124 GB', '50 GB', '1000 GB'],
+                        ans: 1,
+                        exp: 'Tổng dung lượng = 2100 × 60 MB = 126.000 MB. Đổi sang GB: 126.000 / 1024 ≈ 123,05 GB (xấp xỉ 124 GB).'
+                    },
+                    {
+                        num: 18,
+                        q: 'Câu 18: Tại sao việc xử lí của máy tính lại vượt trội hơn tính toán thủ công của con người đối với các bài toán lớn như dự báo thời tiết?',
+                        options: [
+                            'Vì máy tính có kích thước nhỏ hơn con người.',
+                            'Vì máy tính không cần điện để hoạt động.',
+                            'Vì máy tính có thể đưa ra những phỏng đoán sáng tạo về thời tiết.',
+                            'Vì máy tính xử lí thông tin với tốc độ nhanh và chính xác cao.'
+                        ],
+                        ans: 3,
+                        exp: 'Máy tính có tốc độ tính toán hàng tỉ phép tính mỗi giây với độ chính xác rất cao.'
+                    },
+                    {
+                        num: 19,
+                        q: 'Câu 19: [TH] Dữ liệu "28" chỉ trở thành thông tin có ý nghĩa đầy đủ khi nào?',
+                        options: [
+                            'Khi được lưu vào ổ cứng.',
+                            'Khi được đặt trong một ngữ cảnh cụ thể, chẳng hạn “28 tuổi”.',
+                            'Khi được đổi sang hệ nhị phân.',
+                            'Khi được in ra giấy.'
+                        ],
+                        ans: 1,
+                        exp: 'Dữ liệu chỉ trở thành thông tin hữu ích khi gắn với ngữ cảnh cụ thể.'
+                    },
+                    {
+                        num: 20,
+                        q: 'Câu 20: [VD] Một thẻ nhớ 4 GB dùng để lưu các tệp, mỗi tệp có dung lượng 8 MB. Bỏ qua phần dung lượng hệ thống, thẻ nhớ lưu được tối đa bao nhiêu tệp?',
+                        options: ['128 tệp.', '256 tệp.', '512 tệp.', '1024 tệp.'],
+                        ans: 2,
+                        exp: '4 GB = 4 × 1024 MB = 4096 MB. Số tệp tối đa = 4096 / 8 = 512 tệp.'
+                    },
+                    {
+                        num: 21,
+                        q: 'Câu 21: Một byte gồm bao nhiêu bit?',
+                        options: ['2 bit.', '4 bit.', '8 bit.', '16 bit.'],
+                        ans: 2,
+                        exp: 'Quy ước chuẩn: 1 Byte = 8 bit.'
+                    },
+                    {
+                        num: 22,
+                        q: 'Câu 22: [TH] Khi chụp một trang sách bằng điện thoại, tệp ảnh được lưu trong máy được xem là gì?',
+                        options: [
+                            'Dữ liệu số biểu diễn thông tin trên trang sách.',
+                            'Chỉ là thông tin, không phải dữ liệu.',
+                            'Một đơn vị đo thông tin.',
+                            'Một chương trình máy tính.'
+                        ],
+                        ans: 0,
+                        exp: 'Tệp ảnh trong điện thoại là dữ liệu số dùng để biểu diễn nội dung thông tin trên trang sách.'
+                    },
+                    {
+                        num: 23,
+                        q: 'Câu 23: [VD] Một thư mục có dung lượng 2048 MB. Theo quy ước 1 GB = 1024 MB, dung lượng thư mục bằng bao nhiêu GB?',
+                        options: ['1 GB.', '2 GB.', '4 GB.', '8 GB.'],
+                        ans: 1,
+                        exp: '2048 MB / 1024 = 2 GB.'
+                    }
+                ]
+            },
+            {
+                id: 'p1_b2',
+                category: 'mcq',
+                levelBadge: 'Level 2 • Bài 2',
+                title: 'Vai trò của thiết bị thông minh và tin học',
+                subtitle: '25 câu trắc nghiệm 4 đáp án',
+                icon: 'fa-robot',
+                color: 'blue',
+                questions: [
+                    {
+                        num: 1,
+                        q: 'Câu 1. Theo em, hạn chế lớn nhất của máy tính hiện nay là gì?',
+                        options: [
+                            'Khả năng lưu trữ còn thấp so với nhu cầu.',
+                            'Giá thành vẫn còn đắt so với đời sống hiện nay.',
+                            'Kết nối mạng internet còn chậm.',
+                            'Không có khả năng tư duy toàn diện như con người.'
+                        ],
+                        ans: 3,
+                        exp: 'Máy tính làm theo chương trình do con người lập ra, chưa có khả năng tư duy sáng tạo, cảm xúc toàn diện như con người.'
+                    },
+                    {
+                        num: 2,
+                        q: 'Câu 2. Loại công cụ nào gắn liền với nền văn minh thông tin?',
+                        options: ['Máy phát điện.', 'Máy tính điện tử.', 'Đồng hồ.', 'Động cơ hơi nước.'],
+                        ans: 1,
+                        exp: 'Máy tính điện tử là công cụ đặc trưng gắn liền với nền văn minh thông tin.'
+                    },
+                    {
+                        num: 3,
+                        q: 'Câu 3. Trong những tình huống nào sau đây, máy tính thực thi công việc tốt hơn con người?',
+                        options: [
+                            'Khi dịch một tài liệu.',
+                            'Khi thực hiện một phép toán phức tạp.',
+                            'Khi chuẩn đoán bệnh.',
+                            'Khi phân tích tâm lí một con người.'
+                        ],
+                        ans: 1,
+                        exp: 'Máy tính vượt trội con người khi thực hiện các phép tính toán số học phức tạp với khối lượng lớn.'
+                    },
+                    {
+                        num: 4,
+                        q: 'Câu 4. Phát biểu nào dưới đây về khả năng của máy tính là phù hợp nhất?',
+                        options: [
+                            'Lập trình và soạn thảo văn bản.',
+                            'Công cụ xử lí thông tin.',
+                            'Giải trí.',
+                            'Tất cả phương án trên.'
+                        ],
+                        ans: 3,
+                        exp: 'Máy tính là công cụ xử lí thông tin đa năng: hỗ trợ lập trình, soạn thảo, giải trí và nhiều lĩnh vực khác.'
+                    },
+                    {
+                        num: 5,
+                        q: 'Câu 5. Phát biểu nào sau đây là đúng?',
+                        options: [
+                            'Máy tính là sản phẩm trí tuệ duy nhất của con người.',
+                            'Học tin học là học sử dụng máy tính.',
+                            'Máy tính có thể thay thế hoàn toàn cho con người trong việc xử lý thông tin.',
+                            'Trong xã hội hiện đại, con người cần có hiểu biết về tin học để học tập, làm việc và thích ứng tốt hơn.'
+                        ],
+                        ans: 3,
+                        exp: 'Hiểu biết về tin học giúp con người chủ động học tập, làm việc và thích ứng trong kỷ nguyên số.'
+                    },
+                    {
+                        num: 6,
+                        q: 'Câu 6. Theo em, yếu tố nào của con người góp phần quyết định hiệu quả khai thác và sử dụng máy tính?',
+                        options: [
+                            'Tốc độ xử lí dữ liệu của máy tính.',
+                            'Giá thành của máy tính ngày càng giảm.',
+                            'Khả năng và sự hiểu biết của con người.',
+                            'Dung lượng lưu trữ của máy tính ngày càng lớn.'
+                        ],
+                        ans: 2,
+                        exp: 'Khả năng và sự hiểu biết của con người là nhân tố quyết định hiệu quả khai thác máy tính.'
+                    },
+                    {
+                        num: 7,
+                        q: 'Câu 7. Phát biểu nào dưới đây là sai?',
+                        options: [
+                            'Máy tính tốt là máy tính nhỏ, gọn và đẹp.',
+                            'Máy tính ra đời làm thay đổi phương thức quản lí và giao tiếp trong xã hội.',
+                            'Các chương trình trên máy tính ngày càng đáp ứng được nhiều ứng dụng thực tế và dễ sử dụng hơn.',
+                            'Giá thành máy tính ngày càng hạ nhưng tốc độ, độ chính xác của máy tính ngày càng cao.'
+                        ],
+                        ans: 0,
+                        exp: 'Chất lượng máy tính đánh giá qua hiệu năng xử lí, dung lượng lưu trữ, độ bền... chứ không chỉ ở vẻ ngoài nhỏ, gọn, đẹp.'
+                    },
+                    {
+                        num: 8,
+                        q: 'Câu 8. [TH] Vì sao máy tính trở thành công cụ lao động không thể thiếu trong xã hội hiện đại?',
+                        options: [
+                            'Vì máy tính có tốc độ tính toán nhanh và luôn cho kết quả chính xác trong mọi trường hợp.',
+                            'Vì máy tính chỉ được sử dụng để soạn thảo văn bản và truy cập Internet.',
+                            'Vì máy tính có thể giải quyết tất cả các bài toán khó mà không cần sự tham gia của con người.',
+                            'Vì máy tính có khả năng lưu trữ, xử lí và trao đổi thông tin hiệu quả.'
+                        ],
+                        ans: 3,
+                        exp: 'Nhờ khả năng lưu trữ khổng lồ, xử lí nhanh và truyền thông hiệu quả, máy tính trở thành công cụ thiết yếu.'
+                    },
+                    {
+                        num: 9,
+                        q: 'Câu 9. Thiết bị nào dưới đây là thiết bị thông minh:',
+                        options: [
+                            'Đồng hồ kết nối với điện thoại qua Bluetooth.',
+                            'Cân.',
+                            'Ổ cắm.',
+                            'Khóa đa năng.'
+                        ],
+                        ans: 0,
+                        exp: 'Đồng hồ thông minh (Smartwatch) có hệ điều hành, xử lí tự chủ và kết nối Bluetooth với điện thoại.'
+                    },
+                    {
+                        num: 10,
+                        q: 'Câu 10. Phát biểu nào sau đây KHÔNG đúng về máy tính điện tử?',
+                        options: [
+                            'Máy tính có thể liên kết với nhau thành mạng để trao đổi và xử lí thông tin.',
+                            'Máy tính có thể lưu trữ lượng lớn thông tin trong không gian nhỏ gọn.',
+                            'Máy tính có thể làm việc liên tục 24/7 mà không cần nguồn điện.',
+                            'Tốc độ xử lí của máy tính nhanh và ngày càng được cải thiện.'
+                        ],
+                        ans: 2,
+                        exp: 'Máy tính là thiết bị điện tử nên bắt buộc phải có nguồn điện để hoạt động.'
+                    },
+                    {
+                        num: 11,
+                        q: 'Câu 11. [NB] Phát biểu nào sau đây mô tả đúng về thiết bị thông minh?',
+                        options: [
+                            'Là thiết bị điện tử có khả năng hoạt động tự chủ và kết nối để trao đổi dữ liệu.',
+                            'Là thiết bị có màn hình cảm ứng và cài đặt được nhiều ứng dụng.',
+                            'Là thiết bị có khả năng sử dụng trí tuệ nhân tạo để trò chuyện với con người.',
+                            'Là thiết bị điện tử được sản xuất sau năm 2010.'
+                        ],
+                        ans: 0,
+                        exp: 'Thiết bị thông minh là thiết bị số tích hợp phần mềm, có thể làm việc tự chủ ở mức độ nhất định và có khả năng kết nối mạng/trao đổi dữ liệu.'
+                    },
+                    {
+                        num: 12,
+                        q: 'Câu 12. [TH] Một nhiếp ảnh gia sử dụng máy ảnh kỹ thuật số để chụp ảnh, dùng phần mềm trên máy tính để chỉnh sửa ảnh và đăng tải sản phẩm lên mạng xã hội. Ví dụ này thể hiện rõ nhất đóng góp nào của tin học?',
+                        options: [
+                            'Hỗ trợ giải quyết các bài toán khoa học và kỹ thuật.',
+                            'Tăng cường giao tiếp cộng đồng bằng thư điện tử.',
+                            'Thay đổi phương pháp làm việc và quảng bá sản phẩm của ngành nhiếp ảnh.',
+                            'Tự động hóa các công đoạn trong sản xuất công nghiệp.'
+                        ],
+                        ans: 2,
+                        exp: 'Tin học đã làm thay đổi toàn bộ quy trình chụp, hậu kỳ và quảng bá sản phẩm của nhiếp ảnh gia.'
+                    },
+                    {
+                        num: 13,
+                        q: 'Câu 13: Giao thức nào cho phép kết nối mạng máy tính toàn cầu, hình thành nên Internet?',
+                        options: ['TCP/IP', 'Bluetooth', 'HTTP/FTP', 'WWW'],
+                        ans: 0,
+                        exp: 'Bộ giao thức truyền thông TCP/IP là nền tảng kết nối các mạng máy tính thành Internet toàn cầu.'
+                    },
+                    {
+                        num: 14,
+                        q: 'Câu 14: Ngôn ngữ lập trình bậc cao đầu tiên được công bố chính thức vào năm 1957 có tên là gì?',
+                        options: ['FORTRAN', 'C++', 'Pascal', 'Python'],
+                        ans: 0,
+                        exp: 'FORTRAN (công bố năm 1957) là ngôn ngữ lập trình bậc cao đầu tiên.'
+                    },
+                    {
+                        num: 15,
+                        q: 'Câu 15: Đâu là một công nghệ nền tảng của cuộc Cách mạng công nghiệp 4.0?',
+                        options: ['Sản xuất dây chuyền.', 'Máy tính cầm tay.', 'Internet vạn vật (IoT).', 'Động cơ hơi nước.'],
+                        ans: 2,
+                        exp: 'IoT (Internet vạn vật), AI, Big Data, Cloud Computing là các trụ cột của CMCN 4.0.'
+                    },
+                    {
+                        num: 16,
+                        q: 'Câu 16: [TH] Một hệ thống nhà kính thông minh sử dụng các cảm biến để đo nhiệt độ, độ ẩm và ánh sáng. Dữ liệu này được gửi đến một máy tính trung tâm, sau đó máy tính sẽ tự động điều khiển hệ thống tưới tiêu, mái che và quạt gió. Đây là một ví dụ ứng dụng của công nghệ nào?',
+                        options: [
+                            'Hệ điều hành MS-DOS.',
+                            'Chế bản điện tử.',
+                            'Ngôn ngữ lập trình FORTRAN.',
+                            'Internet vạn vật (IoT).'
+                        ],
+                        ans: 3,
+                        exp: 'Các cảm biến và thiết bị điều khiển tự động thu thập, trao đổi dữ liệu qua mạng chính là ứng dụng của IoT.'
+                    },
+                    {
+                        num: 17,
+                        q: 'Câu 17. [NB] Thiết bị nào sau đây không được xem là thiết bị thông minh?',
+                        options: [
+                            'Đồng hồ thông minh có kết nối Bluetooth.',
+                            'Điện thoại thông minh.',
+                            'Máy tính cầm tay thông thường.',
+                            'Camera thông minh có kết nối Internet.'
+                        ],
+                        ans: 2,
+                        exp: 'Máy tính cầm tay thông thường (Casio bỏ túi) chỉ là thiết bị tính toán số, không hoạt động tự chủ hay kết nối mạng trao đổi dữ liệu.'
+                    },
+                    {
+                        num: 18,
+                        q: 'Câu 18: Đặc điểm cốt lõi nào giúp phân biệt một chiếc "smart watch" với một chiếc đồng hồ điện tử thông thường?',
+                        options: [
+                            'Hiển thị được ngày tháng.',
+                            'Khả năng kết nối với điện thoại qua bluetooth để trao đổi dữ liệu.',
+                            'Có chức năng bấm giờ.',
+                            'Có đèn nền để xem ban đêm.'
+                        ],
+                        ans: 1,
+                        exp: 'Smartwatch có hệ điều hành và khả năng kết nối không dây (Bluetooth/Wi-Fi) để đồng bộ, trao đổi dữ liệu.'
+                    },
+                    {
+                        num: 19,
+                        q: 'Câu 19: [TH] Tại sao thiết bị thông minh được coi là "thành phần chủ chốt" của Cách mạng công nghiệp 4.0?',
+                        options: [
+                            'Vì chúng tiêu thụ nhiều điện năng.',
+                            'Vì chúng được phát minh gần đây nhất.',
+                            'Vì chúng có giá thành đắt đỏ nhất.',
+                            'Vì chúng là nền tảng của các hệ thống IoT, một nội dung cơ bản của CMCN 4.0.'
+                        ],
+                        ans: 3,
+                        exp: 'Thiết bị thông minh là các nút mạng cấu thành nên hệ thống IoT trong CMCN 4.0.'
+                    },
+                    {
+                        num: 20,
+                        q: 'Câu 20: [TH] Một chiếc ô tô hiện đại có khả năng tự phanh khi phát hiện vật cản, tự động giữ khoảng cách với xe phía trước và kết nối internet để cập nhật bản đồ. Chiếc ô tô này được coi là một thiết bị thông minh vì:',
+                        options: [
+                            'Nó được làm bằng kim loại và kính.',
+                            'Nó có thể di chuyển nhanh hơn xe đạp.',
+                            'Nó có khả năng hoạt động tự chủ ở một mức độ, có phần mềm điều khiển và khả năng kết nối.',
+                            'Nó có bốn bánh xe và một động cơ.'
+                        ],
+                        ans: 2,
+                        exp: 'Khả năng tự xử lí tình huống (hoạt động tự chủ), có phần mềm điều khiển và kết nối mạng là dấu hiệu của thiết bị thông minh.'
+                    },
+                    {
+                        num: 21,
+                        q: 'Câu 21: [TH] Đặc điểm nào phù hợp nhất với một thiết bị thông minh?',
+                        options: [
+                            'Chỉ có màn hình cảm ứng.',
+                            'Có khả năng hoạt động tự chủ ở một mức độ và có thể kết nối để trao đổi dữ liệu.',
+                            'Chỉ dùng pin sạc.',
+                            'Luôn phải có bàn phím và chuột.'
+                        ],
+                        ans: 1,
+                        exp: 'Hai đặc trưng quan trọng nhất của thiết bị thông minh là hoạt động tự chủ và kết nối trao đổi dữ liệu.'
+                    },
+                    {
+                        num: 22,
+                        q: 'Câu 22: [VD] Một hệ thống tưới cây dùng cảm biến độ ẩm đất, tự gửi dữ liệu và điều khiển máy bơm qua mạng. Hệ thống này minh hoạ rõ nhất cho công nghệ nào?',
+                        options: ['IoT.', 'Bảng mã ASCII.', 'Hệ nhị phân.', 'Phần mềm soạn thảo văn bản.'],
+                        ans: 0,
+                        exp: 'Hệ thống cảm biến kết nối mạng và điều khiển tự động là minh họa điển hình của IoT (Internet of Things).'
+                    },
+                    {
+                        num: 23,
+                        q: 'Câu 23: [TH] Đóng góp nào của tin học được thể hiện khi nhà máy dùng máy tính để điều khiển dây chuyền sản xuất tự động?',
+                        options: [
+                            'Tự động hoá quy trình sản xuất.',
+                            'Chỉ tăng dung lượng lưu trữ.',
+                            'Thay thế Internet bằng mạng LAN.',
+                            'Chuyển mọi dữ liệu thành văn bản.'
+                        ],
+                        ans: 0,
+                        exp: 'Điều khiển dây chuyền bằng máy tính giúp tự động hóa quy trình sản xuất công nghiệp.'
+                    },
+                    {
+                        num: 24,
+                        q: 'Câu 24: [VD] Công tơ điện tử tự đọc chỉ số và gửi dữ liệu về trung tâm. Lợi ích nổi bật nhất là gì?',
+                        options: [
+                            'Tăng công việc ghi chép thủ công.',
+                            'Thu thập dữ liệu tự động, kịp thời và giảm lao động thủ công.',
+                            'Không cần bất kì mạng truyền dữ liệu nào.',
+                            'Chỉ dùng để hiển thị thời gian.'
+                        ],
+                        ans: 1,
+                        exp: 'Công tơ điện tử thông minh giúp thu thập số điện tự động, chính xác, kịp thời và không cần nhân viên đi ghi chỉ số thủ công.'
+                    },
+                    {
+                        num: 25,
+                        q: 'Câu 25: [TH] Vì sao Internet vạn vật (IoT) có vai trò quan trọng trong Cách mạng công nghiệp 4.0?',
+                        options: [
+                            'Vì IoT chủ yếu được sử dụng để phát triển các trò chơi điện tử.',
+                            'Vì IoT cho phép các thiết bị kết nối, thu thập và trao đổi dữ liệu, góp phần tự động hóa các hoạt động.',
+                            'Vì IoT giúp các thiết bị hoạt động mà không cần phần mềm.',
+                            'Vì IoT chỉ cho phép các thiết bị kết nối trong phạm vi một căn phòng.'
+                        ],
+                        ans: 1,
+                        exp: 'IoT kết nối vạn vật để thu thập, chia sẻ dữ liệu theo thời gian thực, giúp tự động hóa thông minh mọi quy trình.'
+                    }
+                ]
+            },
+            {
+                id: 'p1_b3',
+                category: 'mcq',
+                levelBadge: 'Level 3 • Bài 3',
+                title: 'Một số kiểu dữ liệu và dữ liệu văn bản',
+                subtitle: '24 câu trắc nghiệm 4 đáp án',
+                icon: 'fa-font',
+                color: 'violet',
+                questions: [
+                    {
+                        num: 1,
+                        q: 'Câu 1. Tìm phát biểu sai trong các phát biểu sau:',
+                        options: [
+                            'Khi đưa vào máy tính thông tin chuyển thành dữ liệu.',
+                            'Dữ liệu là số có thể tính toán và so sánh.',
+                            'Dữ liệu là văn bản không thể tách so sánh được.',
+                            'Biểu diễn thông tin là mã hoá thông tin.'
+                        ],
+                        ans: 2,
+                        exp: 'Dữ liệu văn bản hoàn toàn có thể tách chuỗi, tìm kiếm và so sánh thứ tự từ điển được.'
+                    },
+                    {
+                        num: 2,
+                        q: 'Câu 2. Đâu không phải kiểu dữ liệu thường gặp?',
+                        options: ['Văn bản.', 'Số.', 'Lôgic.', 'Bit.'],
+                        ans: 3,
+                        exp: 'Bit là đơn vị đo lượng thông tin nhỏ nhất, không phải là tên một kiểu dữ liệu bậc cao như Văn bản, Số, Lôgic, Đa phương tiện.'
+                    },
+                    {
+                        num: 3,
+                        q: 'Câu 3: [TH] Số điện thoại thường được lưu dưới kiểu văn bản thay vì kiểu số vì lí do nào phù hợp nhất?',
+                        options: [
+                            'Vì số điện thoại không dùng để thực hiện các phép toán số học.',
+                            'Vì máy tính không lưu được nhiều chữ số.',
+                            'Vì số điện thoại luôn có chữ cái.',
+                            'Vì kiểu văn bản chiếm 0 byte.'
+                        ],
+                        ans: 0,
+                        exp: 'Số điện thoại không dùng để cộng trừ nhân chia và cần giữ nguyên chữ số 0 ở đầu nên được lưu kiểu văn bản (xâu kí tự).'
+                    },
+                    {
+                        num: 4,
+                        q: 'Câu 4: [VD] Theo UTF-8, chuỗi “ABC” gồm ba kí tự Latin không dấu cần tối thiểu bao nhiêu byte?',
+                        options: ['1 byte.', '2 byte.', '3 byte.', '6 byte.'],
+                        ans: 2,
+                        exp: 'Trong UTF-8, mỗi kí tự Latin không dấu (A, B, C) dùng 1 byte. Vậy 3 kí tự cần 3 byte.'
+                    },
+                    {
+                        num: 5,
+                        q: 'Câu 5. Có bao nhiêu phát biểu đúng trong các phát biểu sau?\n1) Bảng mã ASCII gốc dùng 7 bit và mã hoá được 128 kí tự.\n2) Bảng mã ASCII mở rộng dùng 8 bit và mã hoá được 256 kí tự.\n3) Unicode chỉ mã hoá được tối đa 256 kí tự.\n4) UTF-8 luôn dùng đúng 1 byte để mã hoá mọi kí tự Unicode.',
+                        options: ['4.', '1.', '3.', '2.'],
+                        ans: 3,
+                        exp: 'Có 2 phát biểu đúng là (1) và (2). Phát biểu (3) sai vì Unicode mã hóa hơn 140.000 kí tự; (4) sai vì UTF-8 dùng từ 1 đến 4 byte.'
+                    },
+                    {
+                        num: 6,
+                        q: 'Câu 6. [TH] Trong bảng mã UTF-8, một chữ cái tiếng Việt có dấu như “ế” được biểu diễn bằng bao nhiêu byte?',
+                        options: ['1 byte.', '2 byte.', '3 byte.', '4 byte.'],
+                        ans: 2,
+                        exp: 'Trong UTF-8, các kí tự tiếng Việt có dấu phức hợp như "ế", "ậ", "ữ"... được biểu diễn bằng 3 byte.'
+                    },
+                    {
+                        num: 7,
+                        q: 'Câu 7. Dữ liệu đa phương tiện trong máy tính bao gồm những dạng nào sau đây?',
+                        options: [
+                            'Văn bản và số.',
+                            'Số nguyên và số thực.',
+                            'Hình ảnh, âm thanh và video.',
+                            'Kiểu lôgic và kiểu kí tự.'
+                        ],
+                        ans: 2,
+                        exp: 'Dữ liệu đa phương tiện (multimedia) bao gồm hình ảnh, âm thanh, video...'
+                    },
+                    {
+                        num: 8,
+                        q: 'Câu 8. Trong bảng chữ cái La tinh không có kí tự nào sau đây?',
+                        options: ['G.', 'H.', 'Đ.', 'L.'],
+                        ans: 2,
+                        exp: 'Chữ "Đ" là kí tự mở rộng của tiếng Việt, không nằm trong 26 chữ cái La-tinh cơ bản.'
+                    },
+                    {
+                        num: 9,
+                        q: 'Câu 9. Việt Nam ban hành sử dụng UTF-8 từ năm nào?',
+                        options: ['2015.', '2016.', '2017.', '2018.'],
+                        ans: 2,
+                        exp: 'Theo SGK Tin học 10, năm 2017 Bộ Thông tin và Truyền thông ban hành thông tư quy định sử dụng chuẩn UTF-8.'
+                    },
+                    {
+                        num: 10,
+                        q: 'Câu 10. Tệp văn bản là định dạng lưu trữ ở bộ nhớ nào?',
+                        options: ['Bộ nhớ ngoài.', 'Bộ nhớ trong.', 'Cả hai bộ nhớ.', 'Không có bộ nhớ nào.'],
+                        ans: 0,
+                        exp: 'Tệp (file) văn bản được lưu trữ lâu dài ở bộ nhớ ngoài (ổ cứng, USB, thẻ nhớ...).'
+                    },
+                    {
+                        num: 11,
+                        q: 'Câu 11. Bảng mã ASCII mở rộng sử dụng mấy bit để biểu diễn 1 ký tự?',
+                        options: ['8.', '16.', '32.', '256.'],
+                        ans: 0,
+                        exp: 'Bảng mã ASCII mở rộng dùng 8 bit (1 byte) để mã hóa 256 kí tự.'
+                    },
+                    {
+                        num: 12,
+                        q: 'Câu 12. Tại sao cần có Unicode?',
+                        options: [
+                            'Để đảm bảo bình đẳng cho mọi quốc gia trong ứng dụng tin học.',
+                            'Bảng mã ASCII mã hóa mỗi kí tự bởi 1 byte. Giá thành thiết bị lưu trữ ngày càng rẻ nên không cần phải sử dụng các bộ kí tự mã hóa bởi 1 byte.',
+                            'Dùng một bảng mã chung cho mọi quốc gia, giải quyết vấn đề thiếu vị trí cho bộ kí tự của một số quốc gia, đáp ứng nhu cầu dùng nhiều ngôn ngữ đồng thời trong cùng một ứng dụng.',
+                            'Dùng cho quốc gia sử dụng chữ tượng hình.'
+                        ],
+                        ans: 2,
+                        exp: 'Unicode ra đời để thống nhất một bảng mã toàn cầu cho mọi ngôn ngữ, cho phép hiển thị đa ngôn ngữ trong cùng một văn bản.'
+                    },
+                    {
+                        num: 13,
+                        q: 'Câu 13. Việc mã hóa thông tin thành dữ liệu nhị phân gọi là',
+                        options: ['Mã hóa thông tin.', 'Biểu diễn thông tin.', 'Xử lý thông tin.', 'Cung cấp thông tin.'],
+                        ans: 1,
+                        exp: 'Theo SGK, việc mã hóa thông tin thành dữ liệu nhị phân trong máy tính được gọi là biểu diễn thông tin.'
+                    },
+                    {
+                        num: 14,
+                        q: 'Câu 14. Biểu diễn thông tin là bước thứ mấy để đưa thông tin vào máy tính?',
+                        options: ['Thứ nhất.', 'Thứ hai.', 'Thứ 3.', 'Thứ 4.'],
+                        ans: 0,
+                        exp: 'Biểu diễn thông tin thành dữ liệu là bước đầu tiên (thứ nhất) để đưa thông tin vào máy tính.'
+                    },
+                    {
+                        num: 15,
+                        q: 'Câu 15. Theo UTF-8, một kí tự Latin không dấu (ví dụ A, B, C) được mã hoá bằng bao nhiêu byte?',
+                        options: ['1 byte.', '2 byte.', '3 byte.', '4 byte.'],
+                        ans: 0,
+                        exp: 'Các kí tự ASCII cơ bản (Latin không dấu) trong UTF-8 chỉ tốn 1 byte.'
+                    },
+                    {
+                        num: 16,
+                        q: 'Câu 16: Một tệp văn bản có nội dung là "TIN HOC". Nếu mỗi kí tự được mã hóa bằng bảng mã ASCII mở rộng (8 bit), tệp này chiếm dung lượng tối thiểu là bao nhiêu byte?',
+                        options: ['64 byte', '8 byte', '6 byte', '7 byte'],
+                        ans: 3,
+                        exp: 'Chuỗi "TIN HOC" gồm 7 kí tự (kể cả dấu cách ở giữa). Mỗi kí tự 1 byte -> 7 byte.'
+                    },
+                    {
+                        num: 17,
+                        q: 'Câu 17: Tại sao số Căn cước công dân thường được coi là dữ liệu kiểu văn bản thay vì kiểu số?',
+                        options: [
+                            'Vì máy tính không thể lưu được số có 12 chữ số.',
+                            'Vì nó không dùng để thực hiện các phép tính số học (cộng, trừ, nhân, chia).',
+                            'Vì nó có chứa các kí tự đặc biệt.',
+                            'Vì nó quá dài để lưu dưới dạng số.'
+                        ],
+                        ans: 1,
+                        exp: 'Số CCCD dùng để định danh, có chữ số 0 ở đầu và không dùng để tính toán số học nên được lưu kiểu văn bản.'
+                    },
+                    {
+                        num: 18,
+                        q: 'Câu 18: Tại sao khi gõ văn bản Tiếng Việt trên máy tính, đôi khi ta gặp lỗi hiển thị phông chữ (ví dụ: "tiÕng ViÖt")?',
+                        options: [
+                            'Do văn bản được mã hóa bằng một bảng mã (ví dụ TCVN3) nhưng lại được hiển thị bằng một phông chữ không tương thích (ví dụ phông chỉ hỗ trợ Unicode).',
+                            'Do bộ gõ tiếng Việt bị lỗi.',
+                            'Do máy tính bị nhiễm virus.',
+                            'Do bàn phím bị hỏng.'
+                        ],
+                        ans: 0,
+                        exp: 'Lỗi phông chữ xảy ra khi bảng mã dùng để lưu văn bản và phông chữ dùng để hiển thị không cùng một chuẩn mã.'
+                    },
+                    {
+                        num: 19,
+                        q: 'Câu 19: Trong bảng mã ASCII thì ký tự “B” đứng ngay sau ký tự “A”, vậy mã nhị phân của kí tự "A" là 01000001 thì mã nhị phân của kí tự "B" là gì?',
+                        options: ['01000011', '01000000', '01000010', '11000010'],
+                        ans: 2,
+                        exp: 'Cộng thêm 1 vào 01000001 (65) ta được 01000010 (66).'
+                    },
+                    {
+                        num: 20,
+                        q: 'Câu 20: Đâu là ví dụ về dữ liệu kiểu "Lôgic"?',
+                        options: [
+                            'Một bức ảnh .jpg',
+                            '10.5',
+                            'Kết quả của một phép so sánh (đúng/sai).',
+                            '"Hà Nội"'
+                        ],
+                        ans: 2,
+                        exp: 'Dữ liệu kiểu Lôgic chỉ nhận giá trị Đúng (True) hoặc Sai (False), thường là kết quả của phép so sánh.'
+                    },
+                    {
+                        num: 21,
+                        q: 'Câu 21: Bảng mã ASCII gốc dùng bao nhiêu bit và mã hoá được bao nhiêu kí tự?',
+                        options: [
+                            '7 bit, 128 kí tự.',
+                            '8 bit, 128 kí tự.',
+                            '8 bit, 256 kí tự.',
+                            '16 bit, 65536 kí tự.'
+                        ],
+                        ans: 0,
+                        exp: 'ASCII gốc dùng 7 bit nên mã hóa được 2^7 = 128 kí tự.'
+                    },
+                    {
+                        num: 22,
+                        q: 'Câu 22: [TH] Bảng mã ASCII mở rộng dùng 8 bit nên có thể tạo tối đa bao nhiêu mã khác nhau?',
+                        options: ['128.', '255.', '256.', '512.'],
+                        ans: 2,
+                        exp: 'Với 8 bit, số mã tối đa là 2^8 = 256 mã (từ 0 đến 255).'
+                    },
+                    {
+                        num: 23,
+                        q: 'Câu 23: [TH] Ưu điểm quan trọng của Unicode so với ASCII là gì?',
+                        options: [
+                            'Chỉ dùng cho tiếng Anh.',
+                            'Cho phép biểu diễn kí tự của nhiều ngôn ngữ trong một hệ mã thống nhất.',
+                            'Mỗi kí tự luôn chỉ dùng 1 bit.',
+                            'Không cần mã hoá kí tự.'
+                        ],
+                        ans: 1,
+                        exp: 'Unicode hợp nhất bộ kí tự của hầu hết các ngôn ngữ trên thế giới vào một bảng mã duy nhất.'
+                    },
+                    {
+                        num: 24,
+                        q: 'Câu 24: [VD] Tệp văn bản chỉ chứa ba kí tự “XYZ”. Nếu dùng ASCII mở rộng, dung lượng tối thiểu của ba kí tự này là bao nhiêu?',
+                        options: ['3 bit.', '3 byte.', '8 byte.', '24 byte.'],
+                        ans: 1,
+                        exp: 'Mỗi kí tự trong ASCII mở rộng chiếm 1 byte (8 bit). Ba kí tự "XYZ" chiếm 3 byte (tương đương 24 bit).'
+                    }
+                ]
+            },
+            {
+                id: 'p1_b4',
+                category: 'mcq',
+                levelBadge: 'Level 4 • Bài 4',
+                title: 'Hệ nhị phân và dữ liệu số nguyên',
+                subtitle: '19 câu trắc nghiệm 4 đáp án',
+                icon: 'fa-hashtag',
+                color: 'emerald',
+                questions: [
+                    {
+                        num: 1,
+                        q: 'Câu 1. Dãy bit nào dưới đây là biểu diễn nhị phân của số “3” trong hệ thập phân?',
+                        options: ['11.', '101.', '001.', '01.'],
+                        ans: 0,
+                        exp: '3 = 1×2^1 + 1×2^0 = 11₂.'
+                    },
+                    {
+                        num: 2,
+                        q: 'Câu 2. Số biểu diễn trong hệ nhị phân 10011₂ có giá trị thập phân là:',
+                        options: ['17.', '18.', '19.', '20.'],
+                        ans: 2,
+                        exp: '10011₂ = 1×2^4 + 0×2^3 + 0×2^2 + 1×2^1 + 1×2^0 = 16 + 2 + 1 = 19.'
+                    },
+                    {
+                        num: 3,
+                        q: 'Câu 3. [NB] Phương pháp nào thường được sử dụng để biểu diễn số thực trong máy tính?',
+                        options: [
+                            'Biểu diễn bằng mã ASCII.',
+                            'Biểu diễn bằng dấu phẩy động.',
+                            'Biểu diễn bằng mã Unicode.',
+                            'Biểu diễn bằng dãy kí tự văn bản.'
+                        ],
+                        ans: 1,
+                        exp: 'Số thực trong máy tính được biểu diễn bằng phương pháp dấu phẩy động (floating-point).'
+                    },
+                    {
+                        num: 4,
+                        q: 'Câu 4. Hệ nhị phân dùng những chữ số nào?',
+                        options: ['0 và 1.', '1 và 2.', '2 và 3.', '0 và -1.'],
+                        ans: 0,
+                        exp: 'Hệ nhị phân (cơ số 2) chỉ sử dụng hai chữ số là 0 và 1.'
+                    },
+                    {
+                        num: 5,
+                        q: 'Câu 5. [NB] Trong hệ nhị phân, khi cộng hai bit 0 và 1, kết quả bằng bao nhiêu?',
+                        options: ['0.', '1.', '10.', '11.'],
+                        ans: 1,
+                        exp: 'Trong hệ nhị phân: 0 + 0 = 0; 0 + 1 = 1; 1 + 0 = 1; 1 + 1 = 10.'
+                    },
+                    {
+                        num: 6,
+                        q: 'Câu 6. Kết quả của phép cộng 10000₂ + 100₂ là?',
+                        options: ['11000₂.', '10010₂.', '10100₂.', '10000₂.'],
+                        ans: 2,
+                        exp: '10000₂ (16) + 100₂ (4) = 10100₂ (20).'
+                    },
+                    {
+                        num: 7,
+                        q: 'Câu 7: [VD] Kết quả của phép nhân 1011₂ × 110₂ là:',
+                        options: ['11110₂.', '100110₂.', '101010₂.', '1000010₂.'],
+                        ans: 3,
+                        exp: '1011₂ (11) × 110₂ (6) = 66₁₀ = 64 + 2 = 1000010₂.'
+                    },
+                    {
+                        num: 8,
+                        q: 'Câu 8. Kết quả của phép nhân 1101₂ x 101₂ là?',
+                        options: ['100000₂.', '101010₂.', '1010101₂.', '1000001₂.'],
+                        ans: 3,
+                        exp: '1101₂ (13) × 101₂ (5) = 65₁₀ = 64 + 1 = 1000001₂.'
+                    },
+                    {
+                        num: 9,
+                        q: 'Câu 9. Nếu không viết thêm các chữ số 0 vô nghĩa ở bên trái, một số nguyên không âm có bao nhiêu biểu diễn nhị phân chuẩn?',
+                        options: [
+                            'Không có biểu diễn nào.',
+                            'Đúng một biểu diễn.',
+                            'Hai biểu diễn.',
+                            'Vô số biểu diễn.'
+                        ],
+                        ans: 1,
+                        exp: 'Mỗi số nguyên không âm có duy nhất một biểu diễn nhị phân chuẩn.'
+                    },
+                    {
+                        num: 10,
+                        q: 'Câu 10. Muốn phân biệt các số ở hệ cơ số khác nhau người ta làm như thế nào?',
+                        options: [
+                            'Viết thêm chỉ số dưới.',
+                            'Viết thêm chỉ số trên.',
+                            'Mở ngoặc ở bên cạnh.',
+                            'Chú thích sau khi viết.'
+                        ],
+                        ans: 0,
+                        exp: 'Người ta viết thêm chỉ số dưới ở bên phải số để chỉ rõ hệ cơ số, ví dụ 19₁₀, 10011₂.'
+                    },
+                    {
+                        num: 11,
+                        q: 'Câu 11. Quy trình thực hiện phép tính trên máy tính đối với số thập phân cần qua mấy bước?',
+                        options: ['2.', '3.', '4.', '5.'],
+                        ans: 1,
+                        exp: 'Gồm 3 bước: (1) Mã hóa sang nhị phân -> (2) Thực hiện phép tính trong hệ nhị phân -> (3) Giải mã kết quả sang thập phân.'
+                    },
+                    {
+                        num: 12,
+                        q: 'Câu 12. Số 620₁₀ khi biểu diễn sang hệ nhị phân cần số byte là?',
+                        options: ['2.', '4.', '6.', '8.'],
+                        ans: 0,
+                        exp: '620₁₀ = 1001101100₂ (10 bit). 1 byte (8 bit) không đủ chứa 10 bit nên cần tối thiểu 2 byte (16 bit).'
+                    },
+                    {
+                        num: 13,
+                        q: 'Câu 13: Tại sao hệ nhị phân lại được sử dụng làm cơ sở để biểu diễn thông tin trong máy tính?',
+                        options: [
+                            'Vì con người thích làm việc với hai số 0 và 1.',
+                            'Vì hệ nhị phân tiết kiệm bộ nhớ hơn.',
+                            'Vì máy tính được cấu tạo từ các linh kiện chỉ có hai trạng thái (đóng/mở, có điện/không có điện), tương ứng với 0 và 1.',
+                            'Vì hệ nhị phân dễ tính toán hơn hệ thập phân.'
+                        ],
+                        ans: 2,
+                        exp: 'Mạch điện tử trong máy tính hoạt động dựa trên 2 trạng thái vật lí ổn định (đóng/ngắt, điện áp cao/thấp) tương ứng với 1 và 0.'
+                    },
+                    {
+                        num: 14,
+                        q: 'Câu 14: Phương pháp chung để đổi một số nguyên dương từ hệ thập phân sang hệ nhị phân là gì?',
+                        options: [
+                            'Chia liên tiếp số đó cho 2 và lấy số dư.',
+                            'Chia liên tiếp số đó cho 10 và lấy số dư.',
+                            'Nhân liên tiếp số đó với 2.',
+                            'Lấy căn bậc hai của số đó.'
+                        ],
+                        ans: 0,
+                        exp: 'Chia liên tiếp số nguyên dương cho 2 đến khi thương bằng 0, sau đó viết các số dư theo thứ tự ngược lại.'
+                    },
+                    {
+                        num: 15,
+                        q: 'Câu 15: Số 25 trong hệ thập phân có biểu diễn nhị phân là:',
+                        options: ['11001₂.', '10101₂.', '11100₂.', '10011₂.'],
+                        ans: 0,
+                        exp: '25 = 16 + 8 + 1 = 1×2^4 + 1×2^3 + 0×2^2 + 0×2^1 + 1×2^0 = 11001₂.'
+                    },
+                    {
+                        num: 16,
+                        q: 'Câu 16: Số nhị phân 101101₂ có giá trị thập phân là:',
+                        options: ['41.', '43.', '45.', '47.'],
+                        ans: 2,
+                        exp: '101101₂ = 32 + 0 + 8 + 4 + 0 + 1 = 45.'
+                    },
+                    {
+                        num: 17,
+                        q: 'Câu 17: [TH] Một byte có 8 bit. Số nguyên không dấu lớn nhất biểu diễn được bằng 1 byte là bao nhiêu?',
+                        options: ['127.', '255.', '256.', '512.'],
+                        ans: 1,
+                        exp: 'Với 8 bit đều là 1 (11111111₂), giá trị lớn nhất là 2^8 - 1 = 255.'
+                    },
+                    {
+                        num: 18,
+                        q: 'Câu 18: [VD] Kết quả phép cộng 37₁₀ + 15₁₀ khi biểu diễn ở hệ nhị phân là:',
+                        options: ['101100₂.', '110010₂.', '110100₂.', '111000₂.'],
+                        ans: 2,
+                        exp: '37 + 15 = 52₁₀. Đổi 52 sang nhị phân: 52 = 32 + 16 + 4 = 110100₂.'
+                    },
+                    {
+                        num: 19,
+                        q: 'Câu 19: [TH] Khi biểu diễn số nguyên có dấu bằng mã thuận, mã bù 1 hoặc mã bù 2, bit dấu được quy ước như thế nào?',
+                        options: [
+                            'Bit ngoài cùng bên trái; 0 biểu diễn số dương, 1 biểu diễn số âm.',
+                            'Bit ngoài cùng bên phải; 0 biểu diễn số âm, 1 biểu diễn số dương.',
+                            'Không sử dụng bit dấu.',
+                            'Vị trí bit dấu khác nhau trong mỗi cách biểu diễn.'
+                        ],
+                        ans: 0,
+                        exp: 'Bit ngoài cùng bên trái (bit trọng số cao nhất) làm bit dấu: 0 là số dương, 1 là số âm.'
+                    }
+                ]
+            },
+            {
+                id: 'p1_b5',
+                category: 'mcq',
+                levelBadge: 'Level 5 • Bài 5',
+                title: 'Dữ liệu lôgic',
+                subtitle: '17 câu trắc nghiệm 4 đáp án',
+                icon: 'fa-code-branch',
+                color: 'amber',
+                questions: [
+                    {
+                        num: 1,
+                        q: 'Câu 1. Mệnh đề có tính chất nào sau đây?',
+                        options: ['Chỉ đúng.', 'Chỉ sai.', 'Đúng hoặc sai.', 'Đúng và sai.'],
+                        ans: 2,
+                        exp: 'Mỗi mệnh đề lôgic có tính chất hoặc Đúng, hoặc Sai (không thể vừa đúng vừa sai).'
+                    },
+                    {
+                        num: 2,
+                        q: 'Câu 2. Mệnh đề dưới đây, mệnh đề nào đúng?',
+                        options: [
+                            '9 là số nguyên tố.',
+                            '5 là hợp số.',
+                            '3,2 là số vô tỉ.',
+                            '0 không là số nguyên tố, cũng không là hợp số.'
+                        ],
+                        ans: 3,
+                        exp: 'Số 0 và số 1 không phải là số nguyên tố và cũng không phải là hợp số.'
+                    },
+                    {
+                        num: 3,
+                        q: 'Câu 3. Các đại lượng lôgic có thể nhận các giá trị nào sau đây?',
+                        options: [
+                            'Đúng hoặc Sai.',
+                            'Lớn hơn hoặc nhỏ hơn.',
+                            'Bằng nhau.',
+                            'Không thể nhận giá trị nào.'
+                        ],
+                        ans: 0,
+                        exp: 'Đại lượng lôgic chỉ nhận một trong hai giá trị: Đúng (True / 1) hoặc Sai (False / 0).'
+                    },
+                    {
+                        num: 4,
+                        q: 'Câu 4. Tìm mệnh đề hội của 2 mệnh đề: “Nam chăm chỉ” và “Nam học rất giỏi”?',
+                        options: [
+                            'Nam chăm chỉ và Nam học rất giỏi.',
+                            'Nam học rất giỏi hoặc Nam chăm chỉ.',
+                            'Nam không chăm chỉ và Nam học rất giỏi.',
+                            'Nam chăm chỉ nhưng Nam không học giỏi.'
+                        ],
+                        ans: 0,
+                        exp: 'Phép hội (AND) kết hợp hai mệnh đề bằng liên từ "và".'
+                    },
+                    {
+                        num: 5,
+                        q: 'Câu 5. Phép hội, hay còn gọi là phép nhân lôgic được kí hiệu bởi từ tiếng anh nào?',
+                        options: ['OR.', 'AND.', 'NOT.', 'MORE.'],
+                        ans: 1,
+                        exp: 'Phép hội (nhân lôgic) được kí hiệu là AND.'
+                    },
+                    {
+                        num: 6,
+                        q: 'Câu 6. Phép tuyển (phép cộng lôgic) của 2 mệnh đề đúng cho ra kết quả là gì?',
+                        options: ['Sai.', 'Không có giá trị.', 'Đúng.', 'Sai hoặc Đúng.'],
+                        ans: 2,
+                        exp: '1 OR 1 = 1 (Đúng).'
+                    },
+                    {
+                        num: 7,
+                        q: 'Câu 7. Trong một biểu thức lôgic, phép toán nào được thực hiện trước tiên?',
+                        options: [
+                            'Phép tuyển.',
+                            'Phép hợp.',
+                            'Các phép toán trong dấu ngoặc.',
+                            'Đồng thời tất cả.'
+                        ],
+                        ans: 2,
+                        exp: 'Các phép toán nằm trong dấu ngoặc đơn (...) luôn được ưu tiên thực hiện trước tiên.'
+                    },
+                    {
+                        num: 8,
+                        q: 'Câu 8. Các giá trị lôgic “Đúng” và “Sai” được thể hiện lần lượt trong đại số lôgic bởi số nào?',
+                        options: ['0 và 1.', '2 và 1.', '1 và 0.', '-1 và 1.'],
+                        ans: 2,
+                        exp: 'Giá trị "Đúng" thể hiện bởi số 1, giá trị "Sai" thể hiện bởi số 0.'
+                    },
+                    {
+                        num: 9,
+                        q: 'Câu 9. Cần ít nhất bao nhiêu bit để biểu diễn dữ liệu lôgic?',
+                        options: ['0.', '1.', '2.', '3.'],
+                        ans: 1,
+                        exp: 'Chỉ cần tối thiểu 1 bit (0 hoặc 1) để biểu diễn hai trạng thái Sai hoặc Đúng.'
+                    },
+                    {
+                        num: 10,
+                        q: 'Câu 10. Cho mệnh đề “9 là số nguyên tố”, tìm mệnh đề phủ định của mệnh đề trên?',
+                        options: [
+                            '“5 là số nguyên tố”.',
+                            '“9 không phải là số tự nhiên”.',
+                            '“9 không là số nguyên tố”.',
+                            '“0 là số tự nhiên”.'
+                        ],
+                        ans: 2,
+                        exp: 'Phủ định của mệnh đề p là "không phải p", tức là “9 không là số nguyên tố”.'
+                    },
+                    {
+                        num: 11,
+                        q: 'Câu 11: Cho hai mệnh đề p = "Trời nắng" và q = "Trời có gió". Mệnh đề "p AND NOT q" được diễn giải bằng lời là gì?',
+                        options: [
+                            'Trời nắng nhưng không có gió.',
+                            'Trời nắng và trời có gió.',
+                            'Nếu trời nắng thì trời có gió.',
+                            'Trời không nắng hoặc trời có gió.'
+                        ],
+                        ans: 0,
+                        exp: 'p (Trời nắng) AND (và/nhưng) NOT q (không có gió) -> "Trời nắng nhưng không có gió".'
+                    },
+                    {
+                        num: 12,
+                        q: 'Câu 12: Cho p = 1 và q = 0. Kết quả của biểu thức (p OR q) AND (NOT q) là gì?',
+                        options: ['Sai', 'Đúng', '0', 'Không xác định'],
+                        ans: 1,
+                        exp: 'p OR q = 1 OR 0 = 1; NOT q = NOT 0 = 1. Vậy 1 AND 1 = 1 (Đúng).'
+                    },
+                    {
+                        num: 13,
+                        q: 'Câu 13: Nếu p = 1 thì NOT p có giá trị là:',
+                        options: ['0.', '1.', '2.', 'Không xác định.'],
+                        ans: 0,
+                        exp: 'Phép phủ định NOT đảo ngược giá trị: NOT 1 = 0.'
+                    },
+                    {
+                        num: 14,
+                        q: 'Câu 14: Cho p = 0 và q = 1. Giá trị của p OR q là:',
+                        options: ['0.', '1.', '2.', 'Không xác định.'],
+                        ans: 1,
+                        exp: '0 OR 1 = 1.'
+                    },
+                    {
+                        num: 15,
+                        q: 'Câu 15: [TH] Phép AND của hai đại lượng lôgic nhận giá trị Đúng khi nào?',
+                        options: [
+                            'Ít nhất một đại lượng Đúng.',
+                            'Cả hai đại lượng đều Đúng.',
+                            'Cả hai đại lượng đều Sai.',
+                            'Hai đại lượng khác nhau.'
+                        ],
+                        ans: 1,
+                        exp: 'Phép hội (AND) chỉ nhận giá trị Đúng khi cả hai toán hạng đều Đúng.'
+                    },
+                    {
+                        num: 16,
+                        q: 'Câu 16: [VD] Gọi p là “cửa đang mở”, q là “thẻ truy cập hợp lệ”. Điều kiện báo động khi cửa mở nhưng thẻ không hợp lệ được biểu diễn là:',
+                        options: ['p AND q.', 'p OR q.', 'p AND NOT q.', 'NOT p AND q.'],
+                        ans: 2,
+                        exp: 'Cửa đang mở (p) và thẻ không hợp lệ (NOT q) -> p AND NOT q.'
+                    },
+                    {
+                        num: 17,
+                        q: 'Câu 17: [VD] Cho p = 1, q = 1. Giá trị của biểu thức (NOT p) OR q là:',
+                        options: ['0.', '1.', '2.', 'Không xác định.'],
+                        ans: 1,
+                        exp: 'NOT p = NOT 1 = 0. Khi đó 0 OR 1 = 1.'
+                    }
+                ]
+            },
+            {
+                id: 'p1_b6',
+                category: 'mcq',
+                levelBadge: 'Level 6 • Bài 6',
+                title: 'Dữ liệu âm thanh và hình ảnh',
+                subtitle: '23 câu trắc nghiệm 4 đáp án',
+                icon: 'fa-photo-film',
+                color: 'rose',
+                questions: [
+                    {
+                        num: 1,
+                        q: 'Câu 1. Âm thanh là dữ liệu con người tiếp nhận qua giác quan nào?',
+                        options: ['Khứu giác.', 'Thính giác.', 'Thị giác.', 'Xúc giác.'],
+                        ans: 1,
+                        exp: 'Con người nghe âm thanh qua tai (Thính giác).'
+                    },
+                    {
+                        num: 2,
+                        q: 'Câu 2. Hình ảnh là dữ liệu con người tiếp nhận qua giác quan nào?',
+                        options: ['Thị giác.', 'Xúc giác.', 'Thính giác.', 'Không có giác quan nào.'],
+                        ans: 0,
+                        exp: 'Con người nhìn hình ảnh qua mắt (Thị giác).'
+                    },
+                    {
+                        num: 3,
+                        q: 'Câu 3. Máy tính có thể tiếp nhận dữ liệu âm thanh, hình ảnh không?',
+                        options: [
+                            'Không.',
+                            'Chỉ nhận biết dữ liệu âm thanh',
+                            'Có',
+                            'Không có dữ liệu âm thanh, hình ảnh.'
+                        ],
+                        ans: 2,
+                        exp: 'Máy tính hoàn toàn có thể tiếp nhận, lưu trữ và xử lí dữ liệu âm thanh, hình ảnh sau khi số hóa.'
+                    },
+                    {
+                        num: 4,
+                        q: 'Câu 4. Phương pháp cơ bản của số hóa âm thanh là gì?',
+                        options: [
+                            'Khuếch đại mã xung.',
+                            'Ngắt mã xung.',
+                            'Truyền mã xung.',
+                            'Điều chế mã xung.'
+                        ],
+                        ans: 3,
+                        exp: 'Phương pháp cơ bản nhất để số hóa âm thanh là Điều chế mã xung (PCM - Pulse Code Modulation).'
+                    },
+                    {
+                        num: 5,
+                        q: 'Câu 5. Phương pháp điều chế mã xung được thực hiện qua mấy bước?',
+                        options: ['1.', '2.', '3.', '4.'],
+                        ans: 2,
+                        exp: 'Phương pháp PCM thực hiện qua 3 bước: (1) Lấy mẫu -> (2) Biểu diễn giá trị mẫu -> (3) Biểu diễn âm thanh.'
+                    },
+                    {
+                        num: 6,
+                        q: 'Câu 6. Chu kì lấy mẫu là gì?',
+                        options: [
+                            'Khoảng thời gian giữa 2 lần điều chế mã xung.',
+                            'Khoảng thời gian giữa 3 lần lấy mẫu.',
+                            'Khoảng thời gian giữa 2 lần lấy mẫu.',
+                            'Là thời điểm cách đều nhau.'
+                        ],
+                        ans: 2,
+                        exp: 'Chu kì lấy mẫu là khoảng thời gian giữa hai lần lấy mẫu liên tiếp.'
+                    },
+                    {
+                        num: 7,
+                        q: 'Câu 7. Số bit cần thiết để biểu diễn được một giây âm thanh được gọi là gì?',
+                        options: ['Tốc độ bit.', 'Quãng đường bit.', 'Chiều dài bit.', 'Tín hiệu số.'],
+                        ans: 0,
+                        exp: 'Số bit cần thiết để biểu diễn 1 giây âm thanh gọi là tốc độ bit (bit-rate).'
+                    },
+                    {
+                        num: 8,
+                        q: 'Câu 8. Các thiết bị âm thanh số cần có mạch điện tử DAC làm gì?',
+                        options: [
+                            'Dẫn truyền điện.',
+                            'Tạo lại tín hiệu tương tự từ tín hiệu số để phát ra loa hoặc tai nghe.',
+                            'Dẫn truyền xung âm thanh.',
+                            'Không có chức năng gì.'
+                        ],
+                        ans: 1,
+                        exp: 'DAC (Digital-to-Analog Converter) chuyển đổi tín hiệu số trở lại thành tín hiệu tương tự (analog) để phát ra loa/tai nghe.'
+                    },
+                    {
+                        num: 9,
+                        q: 'Câu 9. Có mấy phương pháp chính để giảm kích thước tệp âm thanh?',
+                        options: ['2.', '3.', '4.', '5.'],
+                        ans: 0,
+                        exp: 'Có 2 phương pháp chính: Nén không mất mát (lossless) và Nén có mất mát (lossy, ví dụ MP3).'
+                    },
+                    {
+                        num: 10,
+                        q: 'Câu 10. Ảnh bitmap nguyên gốc được lưu vào các tệp có phần mở rộng là',
+                        options: ['.png.', '.jpg.', '.bmp.', '.pic.'],
+                        ans: 2,
+                        exp: 'Ảnh bitmap nguyên gốc không nén thường có phần mở rộng là .bmp.'
+                    },
+                    {
+                        num: 11,
+                        q: 'Câu 11. Trong ảnh màu thông dụng theo hệ RGB, mỗi điểm ảnh được mã hoá bởi bao nhiêu bit?',
+                        options: ['16.', '24.', '32.', '48.'],
+                        ans: 1,
+                        exp: 'Ảnh màu thông dụng dùng 24 bit cho mỗi điểm ảnh (8 bit Đỏ + 8 bit Lục + 8 bit Lam).'
+                    },
+                    {
+                        num: 12,
+                        q: 'Câu 12. Hình ảnh hiển thị trên máy tính sử dụng hệ màu nào?',
+                        options: ['RBY.', 'RGB.', 'CMYK.', 'Cả A, B, C.'],
+                        ans: 1,
+                        exp: 'Màn hình máy tính, tivi, điện thoại phát sáng hiển thị ảnh theo hệ màu RGB (Red - Green - Blue).'
+                    },
+                    {
+                        num: 13,
+                        q: 'Câu 13. Ảnh xám thông dụng có độ sâu màu là bao nhiêu bit?',
+                        options: ['4.', '8.', '32.', '64.'],
+                        ans: 1,
+                        exp: 'Ảnh đa mức xám thông dụng dùng độ sâu màu 8 bit (256 mức xám).'
+                    },
+                    {
+                        num: 14,
+                        q: 'Câu 14: [TH] Cùng một đoạn âm thanh, phiên bản 320 Kbps so với 128 Kbps thường có đặc điểm nào?',
+                        options: [
+                            'Dùng ít dữ liệu hơn trong mỗi giây.',
+                            'Hai phiên bản luôn có cùng dung lượng.',
+                            'Dùng nhiều dữ liệu hơn trong mỗi giây và thường có dung lượng lớn hơn.',
+                            'Không thể phát trên thiết bị số.'
+                        ],
+                        ans: 2,
+                        exp: 'Tốc độ bit 320 Kbps dùng nhiều bit cho mỗi giây hơn 128 Kbps nên chất lượng tốt hơn và dung lượng tệp lớn hơn.'
+                    },
+                    {
+                        num: 15,
+                        q: 'Câu 15. Ảnh đen trắng có những màu sắc nào dưới đây?',
+                        options: ['Đỏ và đen.', 'Vô số màu sắc.', 'Đỏ, vàng và xanh.', 'Đen và trắng.'],
+                        ans: 3,
+                        exp: 'Ảnh đen trắng (1 bit) chỉ gồm hai màu là đen và trắng.'
+                    },
+                    {
+                        num: 16,
+                        q: 'Câu 16: Tốc độ bit (bit-rate) của âm thanh, ví dụ 128 Kbps, có ý nghĩa là gì?',
+                        options: [
+                            'Âm thanh được lấy mẫu 128 nghìn lần mỗi giây.',
+                            'Tệp âm thanh có kích thước là 128 Kilobyte.',
+                            'Cần 128 Kilobit dữ liệu để biểu diễn được một giây âm thanh.',
+                            'Cần 128 Kilobyte để lưu trữ một giây âm thanh.'
+                        ],
+                        ans: 2,
+                        exp: '128 Kbps (Kilobit per second) nghĩa là cần 128 Kilobit dữ liệu để biểu diễn 1 giây âm thanh.'
+                    },
+                    {
+                        num: 17,
+                        q: 'Câu 17: Tại sao hệ màu RGB 24-bit có thể tạo ra khoảng 16,7 triệu màu khác nhau?',
+                        options: [
+                            'Vì máy tính chỉ có thể xử lí tối đa 16,7 triệu phép tính màu.',
+                            'Vì mỗi pixel chiếm 24 byte bộ nhớ.',
+                            'Vì đó là giới hạn của mắt người.',
+                            'Vì mỗi màu cơ bản (Đỏ, Lục, Lam) được biểu diễn bởi 8 bit, cho phép 256 mức cường độ. Tổng số tổ hợp màu là 256×256×256.'
+                        ],
+                        ans: 3,
+                        exp: 'Mỗi kênh màu (R, G, B) dùng 8 bit = 256 mức cường độ. Số màu tạo ra = 256 × 256 × 256 = 16.777.216 màu.'
+                    },
+                    {
+                        num: 18,
+                        q: 'Câu 18: Sự khác biệt cơ bản giữa định dạng ảnh .jpeg và .png là gì?',
+                        options: [
+                            '.png có kích thước tệp luôn nhỏ hơn .jpeg.',
+                            '.jpeg hỗ trợ nhiều màu hơn .png.',
+                            '.jpeg nén có mất mát chất lượng, trong khi .png nén không mất mát chất lượng.',
+                            '.jpeg dùng cho web, .png dùng để in ấn.'
+                        ],
+                        ans: 2,
+                        exp: '.jpeg nén có mất mát chất lượng (dung lượng rất nhỏ), còn .png nén không mất mát chất lượng và hỗ trợ nền trong suốt.'
+                    },
+                    {
+                        num: 19,
+                        q: 'Câu 19: [TH] Thứ tự đúng của ba bước số hoá âm thanh theo phương pháp PCM trong SGK là:',
+                        options: [
+                            'Lấy mẫu → biểu diễn giá trị mẫu → biểu diễn âm thanh.',
+                            'Biểu diễn âm thanh → lấy mẫu → biểu diễn giá trị mẫu.',
+                            'Lấy mẫu → phát âm thanh → nén ảnh.',
+                            'Nén âm thanh → lấy mẫu → giải mã.'
+                        ],
+                        ans: 0,
+                        exp: 'Ba bước PCM theo SGK: Bước 1: Lấy mẫu -> Bước 2: Biểu diễn giá trị mẫu -> Bước 3: Biểu diễn âm thanh.'
+                    },
+                    {
+                        num: 20,
+                        q: 'Câu 20: [TH] Khi chu kì lấy mẫu nhỏ hơn và thang giá trị mẫu chi tiết hơn thì điều gì thường xảy ra?',
+                        options: [
+                            'Âm thanh số kém trung thực hơn và ít dữ liệu hơn.',
+                            'Không ảnh hưởng đến dữ liệu.',
+                            'Âm thanh số trung thực hơn nhưng cần ít không gian lưu trữ hơn.',
+                            'Âm thanh số trung thực hơn nhưng cần nhiều không gian lưu trữ hơn.'
+                        ],
+                        ans: 3,
+                        exp: 'Lấy mẫu càng dày và thang chia càng chi tiết thì âm thanh càng trung thực nhưng kích thước dữ liệu tăng lên.'
+                    },
+                    {
+                        num: 21,
+                        q: 'Câu 21: Ảnh xám thông dụng có độ sâu màu 8 bit nên có bao nhiêu mức xám?',
+                        options: ['8.', '16.', '256.', '1024.'],
+                        ans: 2,
+                        exp: 'Độ sâu 8 bit biểu diễn được 2^8 = 256 mức xám khác nhau.'
+                    },
+                    {
+                        num: 22,
+                        q: 'Câu 22: [VD] Một ảnh RGB 24 bit có kích thước 100 × 100 điểm ảnh. Nếu chưa nén, riêng dữ liệu màu cần bao nhiêu byte?',
+                        options: ['10.000 byte.', '20.000 byte.', '30.000 byte.', '240.000 byte.'],
+                        ans: 2,
+                        exp: 'Số điểm ảnh = 100 × 100 = 10.000 điểm. Mỗi điểm 24 bit = 3 byte. Tổng dung lượng = 10.000 × 3 = 30.000 byte.'
+                    },
+                    {
+                        num: 23,
+                        q: 'Câu 23: [TH] Đặc điểm nào đúng với định dạng .png theo SGK?',
+                        options: [
+                            'Nén có mất mát và không hỗ trợ nền trong suốt.',
+                            'Nén không mất mát và có thể hỗ trợ nền trong suốt.',
+                            'Luôn có dung lượng nhỏ hơn mọi tệp .jpeg.',
+                            'Chỉ lưu được ảnh đen trắng.'
+                        ],
+                        ans: 1,
+                        exp: 'Định dạng .png nén không mất mát chất lượng và hỗ trợ làm trong suốt nền ảnh.'
+                    }
+                ]
+            },
+            {
+                id: 'p1_b8',
+                category: 'mcq',
+                levelBadge: 'Level 7 • Bài 8',
+                title: 'Mạng máy tính trong cuộc sống hiện đại',
+                subtitle: '18 câu trắc nghiệm 4 đáp án',
+                icon: 'fa-globe',
+                color: 'cyan',
+                questions: [
+                    {
+                        num: 1,
+                        q: 'Câu 1. Bộ định tuyến (Router) có thể có mấy cổng mạng?',
+                        options: ['4.', '5.', '7.', 'Nhiều cổng.'],
+                        ans: 3,
+                        exp: 'Tùy theo quy mô sử dụng, Router có thể có nhiều cổng mạng (cổng WAN/Internet và các cổng LAN).'
+                    },
+                    {
+                        num: 2,
+                        q: 'Câu 2. Phạm vi sử dụng của internet là?',
+                        options: [
+                            'Chỉ trong gia đình.',
+                            'Chỉ trong cơ quan.',
+                            'Chỉ ở trên máy tính và điện thoại.',
+                            'Toàn cầu.'
+                        ],
+                        ans: 3,
+                        exp: 'Internet là mạng máy tính khổng lồ có phạm vi trên toàn cầu.'
+                    },
+                    {
+                        num: 3,
+                        q: 'Câu 3. [NB] Công nghệ nào cho phép điện thoại thông minh kết nối Internet thông qua mạng di động?',
+                        options: ['Bluetooth.', 'NFC.', '4G hoặc 5G.', 'GPS.'],
+                        ans: 2,
+                        exp: 'Công nghệ viễn thông di động 4G, 5G cho phép điện thoại kết nối Internet mọi lúc mọi nơi.'
+                    },
+                    {
+                        num: 4,
+                        q: 'Câu 4. Theo phạm vi địa lí, mạng máy tính chia thành mấy loại?',
+                        options: ['3.', '4.', '2.', '5.'],
+                        ans: 2,
+                        exp: 'Theo SGK Tin học 10, xét theo phạm vi địa lí mạng máy tính chia thành 2 loại chính: Mạng cục bộ (LAN) và Mạng diện rộng (WAN).'
+                    },
+                    {
+                        num: 5,
+                        q: 'Câu 5. Mạng cục bộ viết tắt là gì?',
+                        options: ['LAN.', 'WAN.', 'MCB.', 'Không có kí tự viết tắt.'],
+                        ans: 0,
+                        exp: 'Mạng cục bộ viết tắt là LAN (Local Area Network).'
+                    },
+                    {
+                        num: 6,
+                        q: 'Câu 6. Mạng LAN có phạm vi địa lí…. mạng WAN.',
+                        options: ['Lớn hơn.', 'Bé hơn.', 'Bằng.', 'Bằng hoặc lớn hơn.'],
+                        ans: 1,
+                        exp: 'Mạng LAN có phạm vi nhỏ (gia đình, trường học, tòa nhà), bé hơn mạng diện rộng WAN.'
+                    },
+                    {
+                        num: 7,
+                        q: 'Câu 7. [NB] Thiết bị nào được sử dụng để kết nối các mạng LAN khác nhau với nhau?',
+                        options: ['Switch.', 'Hub.', 'Router.', 'Máy in.'],
+                        ans: 2,
+                        exp: 'Router (bộ định tuyến) dùng để kết nối các mạng LAN độc lập với nhau và kết nối ra Internet.'
+                    },
+                    {
+                        num: 8,
+                        q: 'Câu 8. Chọn phát biểu đúng?',
+                        options: [
+                            'Mạng cục bộ không có chủ sở hữu.',
+                            'Mạng internet có chủ sở hữu.',
+                            'Phạm vi của mạng internet là toàn cầu.',
+                            'Mạng cục bộ không thể lắp đặt trong gia đình.'
+                        ],
+                        ans: 2,
+                        exp: 'Internet có phạm vi toàn cầu và không thuộc quyền sở hữu của bất kì cá nhân hay tổ chức duy nhất nào.'
+                    },
+                    {
+                        num: 9,
+                        q: 'Câu 9. Internet có lợi ích đối với các hoạt động nào sau đây?',
+                        options: [
+                            'Giải trí.',
+                            'Bảo vệ sức khỏe.',
+                            'Học tập, làm việc, giao tiếp.',
+                            'Cả 3 ý đều đúng.'
+                        ],
+                        ans: 3,
+                        exp: 'Internet mang lại lợi ích toàn diện trong học tập, làm việc, giao tiếp, giải trí và chăm sóc sức khỏe.'
+                    },
+                    {
+                        num: 10,
+                        q: 'Câu 10. [NB] Trong mô hình cung cấp dịch vụ điện toán đám mây, có bao nhiêu nhóm dịch vụ chính thường được phân biệt?',
+                        options: ['3 nhóm.', '2 nhóm.', '4 nhóm.', '5 nhóm.'],
+                        ans: 0,
+                        exp: 'Có 3 nhóm dịch vụ đám mây chính: SaaS, PaaS và IaaS.'
+                    },
+                    {
+                        num: 11,
+                        q: 'Câu 11. [TH] Một giáo viên lưu trữ tài liệu trên Google Drive để truy cập qua Internet. Dịch vụ này thuộc nhóm nào?',
+                        options: [
+                            'Dịch vụ phần mềm (SaaS).',
+                            'Dịch vụ hạ tầng (IaaS).',
+                            'Mạng nội bộ LAN.',
+                            'Thiết bị nhập dữ liệu.'
+                        ],
+                        ans: 1,
+                        exp: 'Theo phân loại trong SGK (và Phần Tự luận câu 20 trong đề cương), việc thuê tài nguyên lưu trữ như Google Drive minh họa cho dịch vụ hạ tầng (IaaS).'
+                    },
+                    {
+                        num: 12,
+                        q: 'Câu 12. Trong thực tế, IoT có thể ứng dụng trong lĩnh vực nào?',
+                        options: [
+                            'Smart home.',
+                            'Smart car.',
+                            'Smart watch',
+                            'Tất cả các đáp án trên.'
+                        ],
+                        ans: 3,
+                        exp: 'IoT ứng dụng rộng rãi trong nhà thông minh (Smart home), xe thông minh (Smart car), thiết bị đeo thông minh (Smart watch)...'
+                    },
+                    {
+                        num: 13,
+                        q: 'Câu 13: [TH] Lợi ích nào phù hợp với dịch vụ điện toán đám mây?',
+                        options: [
+                            'Chỉ sử dụng được trên một máy tính cố định.',
+                            'Luôn phải tự mua và bảo trì toàn bộ máy chủ.',
+                            'Không thể mở rộng dung lượng theo nhu cầu.',
+                            'Có thể truy cập linh hoạt qua Internet và trả phí theo mức sử dụng đối với nhiều dịch vụ.'
+                        ],
+                        ans: 3,
+                        exp: 'Điện toán đám mây cho phép truy cập mọi nơi qua Internet, linh hoạt mở rộng và chỉ trả phí theo nhu cầu sử dụng.'
+                    },
+                    {
+                        num: 14,
+                        q: 'Câu 14. Việc chia sẻ tài nguyên mạng theo nhu cầu qua internet miễn phí hoặc trả phí theo hạn mức sử dụng được gọi là',
+                        options: [
+                            'Thuê phần cứng.',
+                            'Thuê ứng dụng.',
+                            'Thuê phần mềm.',
+                            'Dịch vụ điện toán đám mây.'
+                        ],
+                        ans: 3,
+                        exp: 'Đó chính là định nghĩa của Dịch vụ điện toán đám mây (Cloud Computing).'
+                    },
+                    {
+                        num: 15,
+                        q: 'Câu 15. [NB] Tên dịch vụ lưu trữ đám mây do Microsoft cung cấp là gì?',
+                        options: ['Google Drive.', 'OneDrive.', 'MediaFire.', 'Dropbox.'],
+                        ans: 1,
+                        exp: 'OneDrive là dịch vụ lưu trữ đám mây của tập đoàn Microsoft.'
+                    },
+                    {
+                        num: 16,
+                        q: 'Câu 16: [TH] Phát biểu nào đúng khi so sánh mạng LAN và Internet?',
+                        options: [
+                            'LAN thường có chủ sở hữu xác định, còn Internet không thuộc sở hữu riêng của một cá nhân hay tổ chức duy nhất.',
+                            'Internet có phạm vi nhỏ hơn LAN.',
+                            'LAN luôn không có chủ sở hữu.',
+                            'Internet chỉ dùng trong trường học.'
+                        ],
+                        ans: 0,
+                        exp: 'Mạng LAN thuộc sở hữu của một gia đình, cơ quan, trường học cụ thể; còn Internet là mạng toàn cầu không thuộc sở hữu riêng của ai.'
+                    },
+                    {
+                        num: 17,
+                        q: 'Câu 17: [VD] Muốn liên kết hai mạng LAN để trao đổi dữ liệu với nhau, thiết bị phù hợp nhất là:',
+                        options: ['Bàn phím.', 'Máy in.', 'Router.', 'Micro.'],
+                        ans: 2,
+                        exp: 'Router (bộ định tuyến) là thiết bị chuyên dụng để kết nối và dẫn đường dữ liệu giữa các mạng LAN.'
+                    },
+                    {
+                        num: 18,
+                        q: 'Câu 18: [TH] Google Docs chạy trên máy chủ của nhà cung cấp và người dùng sử dụng qua Internet là ví dụ của loại dịch vụ nào?',
+                        options: ['SaaS.', 'PaaS.', 'IaaS.', 'LAN.'],
+                        ans: 0,
+                        exp: 'Google Docs cung cấp phần mềm soạn thảo trực tiếp qua trình duyệt nên thuộc nhóm SaaS (Software as a Service).'
+                    }
+                ]
+            },
+
+            // ==================== PHẦN II: TRẮC NGHIỆM ĐÚNG / SAI ====================
+            {
+                id: 'p2_tf1',
+                category: 'tf',
+                levelBadge: 'Level 8 • Đúng/Sai (Đợt 1)',
+                title: 'Câu hỏi Đúng / Sai: Câu 1 → Câu 10',
+                subtitle: '10 câu hỏi (40 mệnh đề Đúng/Sai)',
+                icon: 'fa-check-double',
+                color: 'emerald',
+                questions: [
+                    {
+                        num: 1,
+                        q: 'Câu 1: Chúng ta từng nghe rất nhiều thứ gắn với từ “Smart” như “Smart TV”, “Smart phone”, “Smart watch”..., đó là tên gọi của các thiết bị thông minh. Vậy theo em những phát biểu sau là đúng hay là sai?',
+                        statements: [
+                            { label: 'A', text: 'Thiết bị thông minh là thiết bị số.', ans: true },
+                            { label: 'B', text: 'Thiết bị số là thiết bị thông minh.', ans: false },
+                            { label: 'C', text: 'Thiết bị thông minh có thể làm việc một cách tự chủ.', ans: true },
+                            { label: 'D', text: 'Thiết bị thông minh có thể tương tác với người sử dụng hay các thiết bị thông minh khác.', ans: true }
+                        ],
+                        exp: 'Mọi thiết bị thông minh đều là thiết bị số (A đúng), nhưng không phải thiết bị số nào cũng là thiết bị thông minh (B sai, ví dụ máy tính bỏ túi thông thường).'
+                    },
+                    {
+                        num: 2,
+                        q: 'Câu 2: Việc chia sẻ các tài nguyên mạng theo nhu cầu qua internet miễn phí hoặc trả phí theo hạn mức sử dụng được gọi là điện toán đám mây (gọi tắt là dịch vụ đám mây). Theo em khẳng định nào sau đây là đúng, khẳng định nào là sai khi nói đến dịch vụ đám mây?',
+                        statements: [
+                            { label: 'A', text: 'Bất cứ dịch vụ trực tuyến nào (dịch vụ tương tác qua Internet) đều là dịch vụ đám mây.', ans: false },
+                            { label: 'B', text: 'Báo điện tử đăng tin tức hàng ngày là dịch vụ đám mây.', ans: false },
+                            { label: 'C', text: 'Nhắn tin ngắn trên điện thoại (SMS) là sử dụng dịch vụ đám mây.', ans: false },
+                            { label: 'D', text: 'Web - mail (thư điện tử trên giao diện web) là dịch vụ đám mây.', ans: true }
+                        ],
+                        exp: 'Web-mail (như Gmail) cung cấp phần mềm và lưu trữ trên đám mây (SaaS). Báo điện tử chỉ là trang thông tin web, còn SMS dùng mạng viễn thông di động truyền thống.'
+                    },
+                    {
+                        num: 3,
+                        q: 'Câu 3: Hãy xác định tính đúng – sai của các phát biểu sau đây liên quan đến đơn vị đo thông tin Kilobyte (KB)?',
+                        statements: [
+                            { label: 'A', text: 'Đơn vị đo lượng tin bằng 1000 byte.', ans: false },
+                            { label: 'B', text: '1 KB = 1024 byte.', ans: true },
+                            { label: 'C', text: 'Đơn vị đo dung lượng bộ nhớ tính theo 1000 kí tự.', ans: false },
+                            { label: 'D', text: 'Đơn vị đo tốc độ của máy tính.', ans: false }
+                        ],
+                        exp: 'Theo quy ước nhị phân trong SGK Tin học 10: 1 KB = 2^10 Byte = 1024 Byte.'
+                    },
+                    {
+                        num: 4,
+                        q: 'Câu 4: Như ta đã biết IoT (Internet of Thing) là hệ thống liên mạng bao gồm các phương tiện và vật dụng, các thiết bị thông minh được cài đặt các cảm biến, phần mềm chuyên dụng, giúp chúng có thể tự động kết nối, thu thập và trao đổi dữ liệu qua mạng mà không nhất thiết có sự tương tác trực tiếp giữa con người với con người, hay con người với các thiết bị. Vậy theo em phương án nào sau đây là đúng, phương án nào là sai?',
+                        statements: [
+                            { label: 'A', text: 'IoT là mạng kết nối các thiết bị thông minh thông qua mạng Internet nhằm thu thập dữ liệu trên phạm vi toàn cầu.', ans: true },
+                            { label: 'B', text: 'IoT là mạng của các thiết bị thông minh nhằm thu thập và xử lí dữ liệu tự động.', ans: true },
+                            { label: 'C', text: 'IoT là mạng của các thiết bị tiếp nhận tín hiệu.', ans: false },
+                            { label: 'D', text: 'IoT là mạng của các máy tính, nhằm trao đổi dữ liệu với nhau.', ans: false }
+                        ],
+                        exp: 'IoT kết nối các thiết bị thông minh, cảm biến để thu thập và xử lí dữ liệu tự động trên phạm vi rộng qua Internet (A, B đúng; C, D chưa đầy đủ/nhầm với mạng máy tính truyền thống).'
+                    },
+                    {
+                        num: 5,
+                        q: 'Câu 5. Cho hai dãy bit M và N: M = 1001; N = 11',
+                        statements: [
+                            { label: 'A', text: 'Dãy bit M biểu diễn số 1001 ở hệ thập phân.', ans: false },
+                            { label: 'B', text: 'Nếu giảm bit cuối cùng bên phải của dãy bit M từ 1 xuống 0 thì giá trị thập phân tương ứng giảm đi 1 đơn vị.', ans: true },
+                            { label: 'C', text: 'Kết quả của phép cộng hai dãy bit M và N là dãy bit 1100.', ans: true },
+                            { label: 'D', text: 'Kết quả của phép toán M AND N OR M là 1001.', ans: true }
+                        ],
+                        exp: 'M = 1001₂ = 9₁₀ (A sai). Giảm bit cuối thành 1000₂ = 8₁₀, giảm 1 đơn vị (B đúng). M + N = 1001₂ + 11₂ = 1100₂ (9+3=12, C đúng). Theo luật hấp thụ lôgic: (M AND N) OR M = M = 1001 (D đúng).'
+                    },
+                    {
+                        num: 6,
+                        q: 'Câu 6. Trong máy tính, thông tin dạng văn bản, âm thanh hay ảnh,... đều được mã hóa dưới dạng dãy bit để lưu trữ và xử lý.',
+                        statements: [
+                            { label: 'A', text: 'Unicode là bộ tiêu chuẩn mã hoá kí tự phổ biến hiện nay, hỗ trợ nhiều ngôn ngữ.', ans: true },
+                            { label: 'B', text: 'Khi lấy mẫu tín hiệu âm thanh theo thời gian, người ta rời rạc hóa đồ thị liên tục dạng hình sóng thành nhiều mẫu (đoạn) rất ngắn nối tiếp nhau.', ans: true },
+                            { label: 'C', text: 'Mỗi màu cơ bản trong hệ màu RGB được biểu diễn bởi một dãy bit với độ dài khác nhau.', ans: false },
+                            { label: 'D', text: 'Trong ASCII, nếu kí tự “A” có mã thập phân là 65 thì kí tự “D” có mã thập phân là 70.', ans: false }
+                        ],
+                        exp: 'Trong RGB 24-bit, mỗi màu cơ bản đều dùng 8 bit như nhau (C sai). Kí tự A là 65 thì B=66, C=67, D=68 (D sai).'
+                    },
+                    {
+                        num: 7,
+                        q: 'Câu 7: Bạn quyết định số hoá các album ảnh cũ của gia đình để bảo quản chúng và chia sẻ dễ dàng với người thân. Bạn dùng máy quét để chuyển đổi các bức ảnh vật lí thành tệp hình ảnh và lưu trữ chúng trên một ổ cứng ngoài.',
+                        statements: [
+                            { label: 'A', text: 'Máy quét là một thiết bị hỗ trợ cho bước "Tiếp nhận dữ liệu" trong quá trình xử lí thông tin.', ans: true },
+                            { label: 'B', text: 'Ổ cứng ngoài là một vật mang tin, một phương tiện lưu trữ dữ liệu số.', ans: true },
+                            { label: 'C', text: 'Lợi ích chính của phương pháp số hoá này là một số lượng lớn ảnh có thể được lưu trữ gọn nhẹ và chia sẻ tức thì qua Internet, vượt trội so với việc mang album vật lí.', ans: true },
+                            { label: 'D', text: 'Nếu mỗi tệp ảnh có dung lượng 5 MB, bạn có thể lưu trữ được đúng 200 ảnh trên một thẻ nhớ 1 GB.', ans: false }
+                        ],
+                        exp: '1 GB = 1024 MB. Với mỗi ảnh 5 MB, thẻ 1 GB lưu được 1024 / 5 = 204 ảnh (không phải đúng 200 ảnh -> D sai).'
+                    },
+                    {
+                        num: 8,
+                        q: 'Câu 8: Trong một mạch điện tử đơn giản, một bóng đèn có thể ở một trong hai trạng thái: sáng hoặc tắt. Trạng thái này có thể được biểu diễn bằng hệ nhị phân. Nếu chúng ta có một dãy 4 bóng đèn, chúng ta có thể sử dụng chúng để biểu diễn các số nguyên không âm khác nhau.',
+                        statements: [
+                            { label: 'A', text: 'Trạng thái "tắt" có thể được mã hóa bằng số 0 và trạng thái "sáng" bằng số 1.', ans: true },
+                            { label: 'B', text: 'Một dãy các chữ số nhị phân có thể dùng để biểu diễn một số.', ans: true },
+                            { label: 'C', text: 'Với 4 bóng đèn (4 bit), trạng thái "sáng-tắt-sáng-tắt" (1010) biểu diễn một giá trị khác với "tắt-sáng-tắt-sáng" (0101).', ans: true },
+                            { label: 'D', text: 'Dãy 4 bóng đèn đều sáng (1111) sẽ biểu diễn cho số 16 trong hệ thập phân.', ans: false }
+                        ],
+                        exp: '1111₂ = 8 + 4 + 2 + 1 = 15 trong hệ thập phân (không phải 16 -> D sai).'
+                    },
+                    {
+                        num: 9,
+                        q: 'Câu 9: Các nhận định sau về thông tin và dữ liệu đúng hay sai?',
+                        statements: [
+                            { label: 'A', text: 'Thông tin là ý nghĩa của dữ liệu.', ans: true },
+                            { label: 'B', text: 'Cùng một dữ liệu luôn mang cùng một thông tin trong mọi ngữ cảnh.', ans: false },
+                            { label: 'C', text: 'Khi đưa vào máy tính, thông tin được chuyển thành dữ liệu.', ans: true },
+                            { label: 'D', text: 'Thông tin trong máy tính được biểu diễn dưới dạng dãy bit.', ans: true }
+                        ],
+                        exp: 'Ý B sai vì thông tin rút ra từ dữ liệu phụ thuộc vào ngữ cảnh cụ thể.'
+                    },
+                    {
+                        num: 10,
+                        q: 'Câu 10: [TF4] Các nhận định sau về đơn vị đo thông tin đúng hay sai?',
+                        statements: [
+                            { label: 'A', text: '1 Byte = 8 bit.', ans: true },
+                            { label: 'B', text: '1 KB = 1024 Byte.', ans: true },
+                            { label: 'C', text: '1 MB = 1000 KB.', ans: false },
+                            { label: 'D', text: '1 GB = 1024 MB.', ans: true }
+                        ],
+                        exp: 'Ý C sai vì 1 MB = 1024 KB.'
+                    }
+                ]
+            },
+            {
+                id: 'p2_tf2',
+                category: 'tf',
+                levelBadge: 'Level 9 • Đúng/Sai (Đợt 2)',
+                title: 'Câu hỏi Đúng / Sai: Câu 11 → Câu 20',
+                subtitle: '10 câu hỏi (40 mệnh đề Đúng/Sai)',
+                icon: 'fa-list-check',
+                color: 'teal',
+                questions: [
+                    {
+                        num: 11,
+                        q: 'Câu 11: Các nhận định sau về thiết bị thông minh đúng hay sai?',
+                        statements: [
+                            { label: 'A', text: 'Thiết bị thông minh là một loại thiết bị số.', ans: true },
+                            { label: 'B', text: 'Mọi thiết bị số đều là thiết bị thông minh.', ans: false },
+                            { label: 'C', text: 'Thiết bị thông minh có thể hoạt động tự chủ ở một mức độ.', ans: true },
+                            { label: 'D', text: 'Khả năng kết nối để trao đổi dữ liệu là một đặc điểm quan trọng của thiết bị thông minh.', ans: true }
+                        ],
+                        exp: 'Không phải mọi thiết bị số đều là thiết bị thông minh (B sai).'
+                    },
+                    {
+                        num: 12,
+                        q: 'Câu 12: Các nhận định sau về vai trò của tin học đúng hay sai?',
+                        statements: [
+                            { label: 'A', text: 'Máy tính có thể thay thế hoàn toàn tư duy và quyết định của con người trong mọi tình huống.', ans: false },
+                            { label: 'B', text: 'Tin học làm thay đổi cách thức học tập, làm việc và giao tiếp.', ans: true },
+                            { label: 'C', text: 'Thiết bị thông minh là thành phần quan trọng của các hệ thống IoT.', ans: true },
+                            { label: 'D', text: 'IoT không liên quan đến Cách mạng công nghiệp 4.0.', ans: false }
+                        ],
+                        exp: 'Máy tính không thể thay thế hoàn toàn tư duy con người (A sai) và IoT là trụ cột của CMCN 4.0 (D sai).'
+                    },
+                    {
+                        num: 13,
+                        q: 'Câu 13: Các nhận định sau về bảng mã ASCII đúng hay sai?',
+                        statements: [
+                            { label: 'A', text: 'ASCII gốc dùng 7 bit và có 128 mã.', ans: true },
+                            { label: 'B', text: 'ASCII mở rộng dùng 8 bit và có thể tạo 256 mã khác nhau.', ans: true },
+                            { label: 'C', text: 'Trong ASCII, kí tự A có mã thập phân 65.', ans: true },
+                            { label: 'D', text: 'ASCII có thể mã hoá đầy đủ mọi kí tự của tất cả ngôn ngữ trên thế giới.', ans: false }
+                        ],
+                        exp: 'ASCII chỉ có tối đa 256 mã nên không thể mã hóa mọi ngôn ngữ trên thế giới (cần Unicode -> D sai).'
+                    },
+                    {
+                        num: 14,
+                        q: 'Câu 14: Các nhận định sau về Unicode và UTF-8 đúng hay sai?',
+                        statements: [
+                            { label: 'A', text: 'Theo SGK, Việt Nam ban hành quy định bắt buộc sử dụng UTF-8 vào năm 2017.', ans: true },
+                            { label: 'B', text: 'Trong UTF-8, kí tự Latin không dấu thường dùng 1 byte.', ans: true },
+                            { label: 'C', text: 'Mọi kí tự tiếng Việt trong UTF-8 đều luôn dùng đúng 1 byte.', ans: false },
+                            { label: 'D', text: 'UTF-8 có thể dùng từ 1 đến 4 byte để mã hoá một kí tự Unicode.', ans: true }
+                        ],
+                        exp: 'Kí tự tiếng Việt có dấu trong UTF-8 dùng 2 hoặc 3 byte (C sai).'
+                    },
+                    {
+                        num: 15,
+                        q: 'Câu 15: Các nhận định sau về hệ nhị phân đúng hay sai?',
+                        statements: [
+                            { label: 'A', text: '19₁₀ = 10011₂.', ans: true },
+                            { label: 'B', text: '1101₂ = 13₁₀.', ans: true },
+                            { label: 'C', text: 'Hệ nhị phân chỉ sử dụng hai chữ số 0 và 1.', ans: true },
+                            { label: 'D', text: '1010₂ = 12₁₀.', ans: false }
+                        ],
+                        exp: '1010₂ = 8 + 2 = 10₁₀ (không phải 12 -> D sai).'
+                    },
+                    {
+                        num: 16,
+                        q: 'Câu 16: [TF4] Hãy xác định các phát biểu sau về cách biểu diễn số nguyên có dấu là đúng hay sai.',
+                        statements: [
+                            { label: 'A', text: 'Bit ngoài cùng bên trái được dùng để biểu diễn dấu của số.', ans: true },
+                            { label: 'B', text: 'Bit dấu bằng 0 biểu thị số dương.', ans: true },
+                            { label: 'C', text: 'Bit dấu bằng 1 biểu thị số âm.', ans: true },
+                            { label: 'D', text: 'Số âm được biểu diễn giống nhau trong cả mã thuận, mã bù 1 và mã bù 2.', ans: false }
+                        ],
+                        exp: 'Số dương biểu diễn giống nhau ở cả 3 mã, nhưng số âm được biểu diễn khác nhau ở phần giá trị (D sai).'
+                    },
+                    {
+                        num: 17,
+                        q: 'Câu 17: Các nhận định sau về dữ liệu lôgic đúng hay sai?',
+                        statements: [
+                            { label: 'A', text: 'Mệnh đề là một khẳng định có giá trị Đúng hoặc Sai.', ans: true },
+                            { label: 'B', text: 'Có thể biểu diễn Đúng bằng 1 và Sai bằng 0.', ans: true },
+                            { label: 'C', text: 'Phép AND cho kết quả Đúng khi chỉ cần một toán hạng Đúng.', ans: false },
+                            { label: 'D', text: 'Phép OR chỉ cho kết quả Sai khi cả hai toán hạng đều Sai.', ans: true }
+                        ],
+                        exp: 'Phép AND chỉ Đúng khi cả hai toán hạng cùng Đúng (C sai).'
+                    },
+                    {
+                        num: 18,
+                        q: 'Câu 18: Cho p = 1 và q = 0. Hãy xác định đúng/sai cho các nhận định sau.',
+                        statements: [
+                            { label: 'A', text: 'p AND q = 0.', ans: true },
+                            { label: 'B', text: 'p OR q = 1.', ans: true },
+                            { label: 'C', text: 'NOT p = 1.', ans: false },
+                            { label: 'D', text: '(p OR q) AND (NOT q) = 1.', ans: true }
+                        ],
+                        exp: 'Vì p = 1 nên NOT p = 0 (C sai).'
+                    },
+                    {
+                        num: 19,
+                        q: 'Câu 19: Các nhận định sau về số hoá âm thanh đúng hay sai?',
+                        statements: [
+                            { label: 'A', text: 'PCM là phương pháp cơ bản để số hoá âm thanh được nêu trong SGK.', ans: true },
+                            { label: 'B', text: 'Chu kì lấy mẫu là khoảng thời gian giữa hai lần lấy mẫu.', ans: true },
+                            { label: 'C', text: 'Chu kì lấy mẫu càng nhỏ thì lượng dữ liệu âm thanh cần lưu trữ càng giảm.', ans: false },
+                            { label: 'D', text: 'DAC chuyển tín hiệu số thành tín hiệu tương tự để phát ra loa hoặc tai nghe.', ans: true }
+                        ],
+                        exp: 'Chu kì lấy mẫu càng nhỏ nghĩa là số mẫu lấy trong 1 giây càng nhiều, làm lượng dữ liệu cần lưu trữ tăng lên (C sai).'
+                    },
+                    {
+                        num: 20,
+                        q: 'Câu 20: Các nhận định sau về lưu trữ âm thanh đúng hay sai?',
+                        statements: [
+                            { label: 'A', text: 'Nén không mất mát giúp giảm kích thước tệp mà không làm giảm chất lượng âm thanh.', ans: true },
+                            { label: 'B', text: 'MP3 là một ví dụ phổ biến của cách giảm kích thước tệp có mất mát ở mức chấp nhận được.', ans: true },
+                            { label: 'C', text: 'Nén có mất mát không làm giảm kích thước tệp.', ans: false },
+                            { label: 'D', text: 'Với cùng thời lượng, tốc độ bit cao hơn thường làm tăng lượng dữ liệu cần lưu.', ans: true }
+                        ],
+                        exp: 'Nén có mất mát (như MP3) giúp giảm đáng kể kích thước tệp (khoảng 10 lần so với định dạng gốc -> C sai).'
+                    }
+                ]
+            },
+            {
+                id: 'p2_tf3',
+                category: 'tf',
+                levelBadge: 'Level 10 • Đúng/Sai (Đợt 3)',
+                title: 'Câu hỏi Đúng / Sai: Câu 21 → Câu 30',
+                subtitle: '10 câu hỏi (40 mệnh đề Đúng/Sai)',
+                icon: 'fa-award',
+                color: 'purple',
+                questions: [
+                    {
+                        num: 21,
+                        q: 'Câu 21: Các nhận định sau về ảnh số và hệ màu RGB đúng hay sai?',
+                        statements: [
+                            { label: 'A', text: 'RGB gồm ba màu cơ bản: đỏ, xanh lá cây và xanh dương.', ans: true },
+                            { label: 'B', text: 'Ảnh màu thông dụng có độ sâu màu 24 bit.', ans: true },
+                            { label: 'C', text: 'Ảnh xám thông dụng có độ sâu màu 8 bit.', ans: true },
+                            { label: 'D', text: 'Ảnh đen trắng thông dụng cần độ sâu màu 24 bit.', ans: false }
+                        ],
+                        exp: 'Ảnh đen trắng thông dụng chỉ cần độ sâu màu 1 bit (0 hoặc 1 -> D sai).'
+                    },
+                    {
+                        num: 22,
+                        q: 'Câu 22: Các nhận định sau về định dạng ảnh đúng hay sai?',
+                        statements: [
+                            { label: 'A', text: 'Ảnh bitmap nguyên gốc thường có phần mở rộng .bmp.', ans: true },
+                            { label: 'B', text: '.jpeg thường sử dụng nén có mất mát chất lượng.', ans: true },
+                            { label: 'C', text: '.png có thể nén không mất mát chất lượng.', ans: true },
+                            { label: 'D', text: '.png không hỗ trợ nền trong suốt.', ans: false }
+                        ],
+                        exp: 'Định dạng .png có hỗ trợ nền trong suốt (D sai).'
+                    },
+                    {
+                        num: 23,
+                        q: 'Câu 23: Các nhận định sau về mạng LAN, WAN và Internet đúng hay sai?',
+                        statements: [
+                            { label: 'A', text: 'LAN thường có phạm vi địa lí nhỏ hơn WAN.', ans: true },
+                            { label: 'B', text: 'Internet là một mạng diện rộng có quy mô toàn cầu.', ans: true },
+                            { label: 'C', text: 'Router có thể dùng để kết nối các LAN với nhau.', ans: true },
+                            { label: 'D', text: 'Switch là thiết bị chủ yếu để định tuyến dữ liệu giữa các mạng WAN độc lập.', ans: false }
+                        ],
+                        exp: 'Thiết bị định tuyến dữ liệu giữa các mạng LAN/WAN là Router, còn Switch dùng kết nối các thiết bị nội bộ trong cùng mạng LAN (D sai).'
+                    },
+                    {
+                        num: 24,
+                        q: 'Câu 24: Các nhận định sau về kết nối Internet đúng hay sai?',
+                        statements: [
+                            { label: 'A', text: 'Một mạng LAN có thể thuộc sở hữu của cá nhân, gia đình hoặc tổ chức.', ans: true },
+                            { label: 'B', text: 'Internet thuộc sở hữu tập trung của một cơ quan duy nhất.', ans: false },
+                            { label: 'C', text: 'Muốn truy cập Internet, người dùng thường đăng kí với nhà cung cấp dịch vụ Internet.', ans: true },
+                            { label: 'D', text: 'Router có thể có cổng LAN và cổng Internet.', ans: true }
+                        ],
+                        exp: 'Internet không thuộc sở hữu tập trung của bất kì cá nhân hay tổ chức duy nhất nào (B sai).'
+                    },
+                    {
+                        num: 25,
+                        q: 'Câu 25: Các nhận định sau về điện toán đám mây đúng hay sai?',
+                        statements: [
+                            { label: 'A', text: 'Điện toán đám mây cung cấp tài nguyên công nghệ thông tin theo nhu cầu qua Internet.', ans: true },
+                            { label: 'B', text: 'Mọi dịch vụ đám mây đều bắt buộc phải trả phí.', ans: false },
+                            { label: 'C', text: 'Người dùng thường cần đăng kí tài khoản hoặc thuê bao để sử dụng dịch vụ đám mây.', ans: true },
+                            { label: 'D', text: 'Google Docs là một ví dụ về dịch vụ đám mây.', ans: true }
+                        ],
+                        exp: 'Nhiều dịch vụ đám mây cung cấp gói miễn phí theo hạn mức cho người dùng cá nhân (B sai).'
+                    },
+                    {
+                        num: 26,
+                        q: 'Câu 26: Các nhận định sau về các loại dịch vụ đám mây đúng hay sai?',
+                        statements: [
+                            { label: 'A', text: 'SaaS là phần mềm như một dịch vụ.', ans: true },
+                            { label: 'B', text: 'PaaS là nền tảng như một dịch vụ.', ans: true },
+                            { label: 'C', text: 'IaaS là hạ tầng như một dịch vụ.', ans: true },
+                            { label: 'D', text: 'Theo ví dụ trong SGK, Google Drive là một dịch vụ PaaS.', ans: false }
+                        ],
+                        exp: 'Google Drive không phải là PaaS (nền tảng phát triển phần mềm) -> D sai.'
+                    },
+                    {
+                        num: 27,
+                        q: 'Câu 27: Các nhận định sau về IoT đúng hay sai?',
+                        statements: [
+                            { label: 'A', text: 'IoT liên kết các thiết bị thông minh để tự động thu thập, trao đổi và xử lí dữ liệu.', ans: true },
+                            { label: 'B', text: 'IoT luôn cần con người trực tiếp điều khiển từng lần trao đổi dữ liệu.', ans: false },
+                            { label: 'C', text: 'IoT có thể cung cấp dữ liệu liên tục và kịp thời cho các hệ thống thời gian thực.', ans: true },
+                            { label: 'D', text: 'IoT có thể giúp giảm chi phí do giảm lao động thu thập và xử lí thông tin thủ công.', ans: true }
+                        ],
+                        exp: 'IoT hoạt động tự động mà không cần con người can thiệp trực tiếp vào từng lần trao đổi dữ liệu (B sai).'
+                    },
+                    {
+                        num: 28,
+                        q: 'Câu 28: Một ngôi nhà thông minh có cảm biến và các thiết bị kết nối. Các nhận định sau đúng hay sai?',
+                        statements: [
+                            { label: 'A', text: 'Cảm biến có thể hỗ trợ tự động bật/tắt chiếu sáng hoặc điều hoà.', ans: true },
+                            { label: 'B', text: 'Người dùng có thể giám sát, điều khiển một số thiết bị qua Internet bằng điện thoại thông minh.', ans: true },
+                            { label: 'C', text: 'Nhà thông minh không cần bất kì thiết bị thông minh nào.', ans: false },
+                            { label: 'D', text: 'Tự động hoá hợp lí có thể giúp tiết kiệm năng lượng.', ans: true }
+                        ],
+                        exp: 'Nhà thông minh bắt buộc phải có các cảm biến và thiết bị thông minh kết nối với nhau (C sai).'
+                    },
+                    {
+                        num: 29,
+                        q: 'Câu 29: Một học sinh dùng máy quét để số hoá tài liệu giấy và lưu vào ổ cứng ngoài. Các nhận định sau đúng hay sai?',
+                        statements: [
+                            { label: 'A', text: 'Máy quét hỗ trợ bước tiếp nhận dữ liệu.', ans: true },
+                            { label: 'B', text: 'Ổ cứng ngoài là phương tiện lưu trữ dữ liệu số.', ans: true },
+                            { label: 'C', text: 'Dữ liệu số không bao giờ có nguy cơ bị mất.', ans: false },
+                            { label: 'D', text: 'Tệp số có thể được sao chép và chia sẻ qua mạng thuận tiện hơn tài liệu giấy.', ans: true }
+                        ],
+                        exp: 'Dữ liệu số vẫn có nguy cơ bị mất nếu thiết bị hỏng, virus hoặc xóa nhầm, nên cần sao lưu định kì (C sai).'
+                    },
+                    {
+                        num: 30,
+                        q: 'Câu 30: Các nhận định sau về biểu diễn số bằng bit đúng hay sai?',
+                        statements: [
+                            { label: 'A', text: 'Với 4 bit có thể biểu diễn 16 giá trị không dấu khác nhau.', ans: true },
+                            { label: 'B', text: '1111₂ = 15₁₀.', ans: true },
+                            { label: 'C', text: '10000₂ = 16₁₀.', ans: true },
+                            { label: 'D', text: 'Với 8 bit có thể biểu diễn 512 giá trị không dấu khác nhau.', ans: false }
+                        ],
+                        exp: 'Với 8 bit có thể biểu diễn 2^8 = 256 giá trị không dấu khác nhau (từ 0 đến 255), không phải 512 (D sai).'
+                    }
+                ]
+            },
+
+            // ==================== PHẦN III: TỰ LUẬN (20 CÂU) ====================
+            {
+                id: 'p3_essay',
+                category: 'essay',
+                levelBadge: 'Level 11 • Tự Luận',
+                title: 'Ôn Tập Phần III: Tự Luận (20 Câu)',
+                subtitle: '20 câu hỏi tự luận kèm đáp án chuẩn trong đề cương',
+                icon: 'fa-book-open',
+                color: 'orange',
+                questions: [
+                    {
+                        num: 1,
+                        q: 'Câu 1: Trình bày cách chuyển một số nguyên dương từ hệ nhị phân sang hệ thập phân. Áp dụng chuyển số 1101₂ sang hệ thập phân.',
+                        answer: '• Quy tắc: Việc đổi số nhị phân có dạng d_k d_(k-1)...d_1 d_0 sang số thập phân thực chất là việc tính tổng:\nd_k × 2^k + d_(k-1) × 2^(k-1) + … + d_1 × 2^1 + d_0 × 2^0\n\n• Áp dụng:\n1101₂ = 1×2³ + 1×2² + 0×2¹ + 1×2⁰ = 8 + 4 + 0 + 1 = 13₁₀.\nVậy 1101₂ = 13₁₀.'
+                    },
+                    {
+                        num: 2,
+                        q: 'Câu 2: Kể tên 4 thiết bị thông minh và nêu chức năng tiêu biểu của chúng.',
+                        answer: '1. Bóng đèn thông minh: Bật/tắt hoặc điều chỉnh độ sáng, màu sắc qua điện thoại hoặc giọng nói; hẹn giờ bật đèn, tự động tắt khi không có người.\n2. Robot hút bụi: Tự động dọn dẹp nhà cửa theo lịch trình.\n3. Camera an ninh thông minh: Giám sát nhà cửa, gửi cảnh báo về điện thoại khi phát hiện chuyển động.\n4. Máy lạnh/Điều hòa thông minh: Tự điều chỉnh nhiệt độ qua cảm biến; ghi nhớ thói quen người dùng để tự động thiết lập chế độ phù hợp.'
+                    },
+                    {
+                        num: 3,
+                        q: 'Câu 3: Thực hiện phép tính 27 + 26 theo đúng quy trình 3 bước mà máy tính thực hiện. Trình bày rõ ràng kết quả của từng bước.',
+                        answer: '• Bước 1. Mã hoá dữ liệu sang hệ nhị phân:\n27₁₀ = 11011₂;  26₁₀ = 11010₂.\n\n• Bước 2. Thực hiện phép tính trong hệ nhị phân:\n11011₂ + 11010₂ = 110101₂.\n\n• Bước 3. Giải mã kết quả sang hệ thập phân:\n110101₂ = 32 + 16 + 4 + 1 = 53₁₀.\nVậy 27 + 26 = 53.'
+                    },
+                    {
+                        num: 4,
+                        q: 'Câu 4: Em hãy giải thích tại sao thiết bị thông minh và IoT lại được coi là những yếu tố cơ bản, đóng vai trò chủ chốt trong cuộc Cách mạng công nghiệp lần thứ tư (4.0).',
+                        answer: 'Thiết bị thông minh và IoT đóng vai trò chủ chốt trong CMCN 4.0 vì:\n- IoT liên kết các thiết bị thông minh để tự động thu thập, trao đổi và xử lí dữ liệu phục vụ nhiều mục đích.\n- Các thiết bị thông minh có thể hoạt động tự chủ ở một mức độ, kết nối và phối hợp với các thiết bị khác.\n- IoT thu thập dữ liệu trên diện rộng, hoạt động liên tục và cung cấp dữ liệu kịp thời cho các hệ thống thời gian thực.\n- Nhờ tự động hoá việc thu thập và xử lí thông tin, IoT giảm lao động thủ công và tiết kiệm chi phí.'
+                    },
+                    {
+                        num: 5,
+                        q: 'Câu 5: Trình bày mối quan hệ giữa thông tin và dữ liệu. Cho một ví dụ minh hoạ.',
+                        answer: '- Thông tin là những gì mang lại hiểu biết; dữ liệu là hình thức biểu diễn thông tin để có thể lưu trữ và xử lí.\n- Cùng một dữ liệu có thể mang ý nghĩa khác nhau khi đặt trong các ngữ cảnh khác nhau.\n- Ví dụ: Dữ liệu “18” có thể là tuổi (18 tuổi), số phòng (phòng 18) hoặc nhiệt độ (18°C) tuỳ ngữ cảnh.'
+                    },
+                    {
+                        num: 6,
+                        q: 'Câu 6: Đổi số 45₁₀ sang hệ nhị phân.',
+                        answer: 'Phân tích tổng lũy thừa của 2:\n45 = 32 + 8 + 4 + 1 = 2⁵ + 2³ + 2² + 2⁰.\nVậy 45₁₀ = 101101₂.'
+                    },
+                    {
+                        num: 7,
+                        q: 'Câu 7: Đổi số 101101₂ sang hệ thập phân.',
+                        answer: '101101₂ = 1×2⁵ + 0×2⁴ + 1×2³ + 1×2² + 0×2¹ + 1×2⁰\n= 32 + 0 + 8 + 4 + 0 + 1 = 45.\nVậy 101101₂ = 45₁₀.'
+                    },
+                    {
+                        num: 8,
+                        q: 'Câu 8: Thực hiện phép cộng 10110₂ + 111₂.',
+                        answer: 'Viết 111₂ thành 00111₂ rồi cộng theo quy tắc nhị phân:\n  10110₂\n+ 00111₂\n--------\n  11101₂\nVậy 10110₂ + 111₂ = 11101₂.'
+                    },
+                    {
+                        num: 9,
+                        q: 'Câu 9: Thực hiện phép nhân 101₂ × 110₂.',
+                        answer: 'Ta có: 101₂ = 5₁₀ và 110₂ = 6₁₀, tích bằng 30₁₀.\nĐổi 30₁₀ sang nhị phân: 30₁₀ = 16 + 8 + 4 + 2 = 11110₂.\nVậy 101₂ × 110₂ = 11110₂.'
+                    },
+                    {
+                        num: 10,
+                        q: 'Câu 10: Nêu quy ước bit dấu trong ba cách mã hoá số nguyên có dấu được trình bày trong SGK.',
+                        answer: '- Cả mã thuận, mã bù 1 và mã bù 2 đều dành bit ngoài cùng bên trái làm bit dấu.\n- Bit dấu 0 biểu diễn số dương; bit dấu 1 biểu diễn số âm.\n- Với số dương, ba cách mã hoá giống nhau; với số âm, phần biểu diễn còn lại khác nhau.'
+                    },
+                    {
+                        num: 11,
+                        q: 'Câu 11: Lập bảng giá trị cho các phép AND và OR của hai đại lượng lôgic p, q.',
+                        answer: 'Bảng chân trị:\n• p = 0, q = 0  =>  p AND q = 0  |  p OR q = 0\n• p = 0, q = 1  =>  p AND q = 0  |  p OR q = 1\n• p = 1, q = 0  =>  p AND q = 0  |  p OR q = 1\n• p = 1, q = 1  =>  p AND q = 1  |  p OR q = 1'
+                    },
+                    {
+                        num: 12,
+                        q: 'Câu 12: Cho p = 1, q = 0. Tính giá trị biểu thức (p OR q) AND (NOT q).',
+                        answer: '- Ta có: p OR q = 1 OR 0 = 1.\n- NOT q = NOT 0 = 1.\n- Vậy (p OR q) AND (NOT q) = 1 AND 1 = 1 (Đúng).'
+                    },
+                    {
+                        num: 13,
+                        q: 'Câu 13: Trình bày ba bước cơ bản của số hoá âm thanh theo phương pháp PCM trong SGK.',
+                        answer: '• Bước 1: Lấy mẫu - lấy giá trị biên độ ở các thời điểm rời rạc, cách đều nhau.\n• Bước 2: Biểu diễn giá trị mẫu - quy đổi biên độ theo một thang mức và làm tròn.\n• Bước 3: Biểu diễn âm thanh - ghi lại dãy các giá trị mẫu đã được quy đổi.'
+                    },
+                    {
+                        num: 14,
+                        q: 'Câu 14: Giải thích ảnh hưởng của chu kì lấy mẫu và độ chi tiết của thang giá trị mẫu đối với chất lượng và dung lượng âm thanh số.',
+                        answer: '- Chu kì lấy mẫu càng nhỏ thì lấy mẫu càng dày; thang giá trị mẫu càng chi tiết thì biểu diễn biên độ càng chính xác.\n- Khi đó âm thanh số thường trung thực hơn nhưng lượng dữ liệu cần lưu trữ cũng tăng lên.'
+                    },
+                    {
+                        num: 15,
+                        q: 'Câu 15: Giải thích vì sao ảnh màu RGB 24 bit có thể biểu diễn khoảng 16,7 triệu màu.',
+                        answer: '- Mỗi điểm ảnh dùng 24 bit, chia đều 8 bit cho 3 màu cơ bản R (Đỏ), G (Lục) và B (Lam).\n- Mỗi màu cơ bản có 2⁸ = 256 mức cường độ.\n- Tổng số tổ hợp màu là 256³ = 16.777.216, xấp xỉ 16,7 triệu màu.'
+                    },
+                    {
+                        num: 16,
+                        q: 'Câu 16: So sánh hai định dạng ảnh .jpeg và .png theo nội dung SGK.',
+                        answer: '- Định dạng .jpeg: nén có mất mát chất lượng, tệp thường khá nhỏ, thuận lợi khi truyền tải trên web.\n- Định dạng .png: nén không mất mát chất lượng và có thể hỗ trợ nền trong suốt.'
+                    },
+                    {
+                        num: 17,
+                        q: 'Câu 17: Phân biệt mạng LAN và Internet theo phạm vi, cách kết nối và sở hữu.',
+                        answer: '- Mạng LAN: phạm vi nhỏ (gia đình, trường học, công ty); kết nối trực tiếp trong mạng qua thiết bị như switch/hub/Wi-Fi; có chủ sở hữu xác định.\n- Mạng Internet: mạng diện rộng quy mô toàn cầu; các mạng kết nối qua router và nhà cung cấp dịch vụ (ISP); không thuộc sở hữu riêng của một chủ thể duy nhất.'
+                    },
+                    {
+                        num: 18,
+                        q: 'Câu 18: Nêu khái niệm điện toán đám mây và ba loại dịch vụ đám mây chủ yếu.',
+                        answer: '- Điện toán đám mây là việc cung cấp/chia sẻ tài nguyên công nghệ thông tin theo nhu cầu qua Internet, có thể miễn phí hoặc trả phí theo mức sử dụng.\n- 3 loại dịch vụ chủ yếu:\n  + SaaS: phần mềm như một dịch vụ (ví dụ Google Docs).\n  + PaaS: nền tảng như một dịch vụ.\n  + IaaS: hạ tầng như một dịch vụ (ví dụ thuê tài nguyên lưu trữ trực tuyến).'
+                    },
+                    {
+                        num: 19,
+                        q: 'Câu 19: Nêu khái niệm IoT và ít nhất hai lợi ích của IoT.',
+                        answer: '- Khái niệm: IoT (Internet vạn vật) là hệ thống liên kết các thiết bị thông minh để tự động thu thập, trao đổi và xử lí dữ liệu qua mạng.\n- Lợi ích: Thu thập dữ liệu trên diện rộng; hoạt động liên tục; cung cấp dữ liệu kịp thời cho hệ thống thời gian thực; giảm lao động thủ công và chi phí.'
+                    },
+                    {
+                        num: 20,
+                        q: 'Câu 20: Một học sinh dùng Google Drive để lưu tệp và Google Docs để soạn văn bản. Hãy cho biết hai dịch vụ này minh hoạ loại tài nguyên đám mây nào theo SGK và nêu hai lợi ích.',
+                        answer: '- Google Drive minh hoạ việc thuê tài nguyên lưu trữ/hạ tầng (IaaS theo cách phân loại của bài học).\n- Google Docs là phần mềm ứng dụng được cung cấp như dịch vụ (SaaS).\n- Lợi ích:\n  1. Có thể truy cập ở nhiều nơi khi có kết nối Internet.\n  2. Giảm nhu cầu tự mua, cài đặt và bảo trì toàn bộ tài nguyên; sử dụng linh hoạt theo nhu cầu.'
+                    }
+                ]
+            }
+        ];
+
+        // ============================================================================
+        // STATE MANAGEMENT & LOCAL STORAGE
+        // ============================================================================
+        const STORAGE_KEY = 'TIN10_GK1_LTV_PROGRESS_V1';
+        let userProgress = {}; // { [levelId]: { [qIndex]: { answered: true, isCorrect: bool, selected: any, score: number } } }
+        let activeTab = 'mcq';
+        let currentLevel = null;
+        let currentQIndex = 0;
+        let tempTFSelection = {}; // Lưu tạm lựa chọn Đúng/Sai của câu hiện tại trước khi bấm Kiểm tra
+
+        function loadProgress() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) userProgress = JSON.parse(raw);
+            } catch (e) {
+                userProgress = {};
+            }
+        }
+
+        function saveProgress() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(userProgress));
+            } catch (e) {}
+            updateOverallStats();
+        }
+
+        // ============================================================================
+        // RENDER MÀN HÌNH CHÍNH & DANH SÁCH LEVEL
+        // ============================================================================
+        function updateOverallStats() {
+            let totalInteractive = 0; // 129 MCQ + 30 TF = 159 câu
+            let totalDone = 0;
+            let totalCorrectPoints = 0;
+
+            QUIZ_LEVELS.forEach(lvl => {
+                if (lvl.category === 'essay') return;
+                totalInteractive += lvl.questions.length;
+                const lvlProg = userProgress[lvl.id] || {};
+                Object.values(lvlProg).forEach(item => {
+                    if (item && item.answered) {
+                        totalDone++;
+                        totalCorrectPoints += (item.score !== undefined ? item.score : (item.isCorrect ? 1 : 0));
+                    }
+                });
+            });
+
+            const pctDone = totalInteractive > 0 ? Math.round((totalDone / totalInteractive) * 100) : 0;
+            const accuracy = totalDone > 0 ? Math.round((totalCorrectPoints / totalDone) * 100) : 0;
+
+            document.getElementById('stat-total-done').textContent = totalDone;
+            document.getElementById('stat-percent-circle').textContent = `${pctDone}%`;
+            document.getElementById('stat-accuracy').innerHTML = `Tỉ lệ chính xác: <strong class="text-emerald-600">${accuracy}%</strong>`;
+        }
+
+        function switchCategoryTab(tab) {
+            activeTab = tab;
+            ['mcq', 'tf', 'essay'].forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                if (t === tab) {
+                    btn.className = 'py-2.5 px-2 rounded-xl text-xs font-bold transition shadow-sm bg-white text-indigo-600';
+                } else {
+                    btn.className = 'py-2.5 px-2 rounded-xl text-xs font-bold transition text-slate-600';
+                }
+            });
+            renderLevelsList();
+        }
+
+        function renderLevelsList() {
+            const container = document.getElementById('levels-container');
+            container.innerHTML = '';
+
+            const filtered = QUIZ_LEVELS.filter(l => l.category === activeTab);
+
+            filtered.forEach(lvl => {
+                const lvlProg = userProgress[lvl.id] || {};
+                const totalQ = lvl.questions.length;
+                let doneCount = 0;
+                let correctScore = 0;
+
+                Object.values(lvlProg).forEach(p => {
+                    if (p && p.answered) {
+                        doneCount++;
+                        correctScore += (p.score !== undefined ? p.score : (p.isCorrect ? 1 : 0));
+                    }
+                });
+
+                const pct = totalQ > 0 ? Math.round((doneCount / totalQ) * 100) : 0;
+
+                const card = document.createElement('div');
+                card.className = 'bg-white p-4 rounded-2xl shadow-sm border border-slate-200/90 active:scale-[0.99] transition cursor-pointer';
+                card.onclick = () => startLevel(lvl.id);
+
+                card.innerHTML = `
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-11 h-11 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg shrink-0 font-bold">
+                                <i class="fa-solid ${lvl.icon}"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">${lvl.levelBadge}</span>
+                                    ${doneCount === totalQ ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-700"><i class="fa-solid fa-check mr-1"></i>Hoàn thành</span>' : ''}
+                                </div>
+                                <h3 class="font-bold text-slate-800 text-sm mt-1 leading-snug">${lvl.title}</h3>
+                                <p class="text-xs text-slate-400 mt-0.5">${lvl.subtitle}</p>
+                            </div>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <span class="text-xs font-extrabold text-indigo-600">${doneCount}/${totalQ}</span>
+                            <p class="text-[10px] text-slate-400">đã làm</p>
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                        <div class="flex-1 bg-slate-100 h-1.5 rounded-full overflow-hidden mr-3">
+                            <div class="bg-indigo-600 h-full rounded-full transition-all" style="width: ${pct}%"></div>
+                        </div>
+                        <span class="font-semibold text-slate-600">Điểm: ${correctScore.toFixed(2).replace(/\.00$/, '')}/${totalQ}</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // ============================================================================
+        // ĐIỀU HƯỚNG VÀ HIỂN THỊ CÂU HỎI DẠNG CHUYỂN TRANG
+        // ============================================================================
+        function startLevel(levelId) {
+            currentLevel = QUIZ_LEVELS.find(l => l.id === levelId);
+            if (!currentLevel) return;
+
+            if (!userProgress[levelId]) userProgress[levelId] = {};
+
+            // Tìm câu đầu tiên chưa làm, nếu làm hết rồi thì vào câu 0
+            const firstUnanswered = currentLevel.questions.findIndex((_, idx) => !userProgress[levelId][idx]?.answered);
+            currentQIndex = firstUnanswered !== -1 ? firstUnanswered : 0;
+
+            document.getElementById('view-home').classList.add('hidden');
+            document.getElementById('view-summary').classList.add('hidden');
+            document.getElementById('view-quiz').classList.remove('hidden');
+
+            document.getElementById('btn-back-home').classList.remove('hidden');
+            document.getElementById('btn-grid-drawer').classList.remove('hidden');
+            document.getElementById('quiz-progress-bar-wrap').classList.remove('hidden');
+
+            document.getElementById('header-title').textContent = currentLevel.levelBadge;
+            document.getElementById('header-subtitle').textContent = currentLevel.title;
+
+            renderCurrentQuestion();
+        }
+
+        function showHome() {
+            document.getElementById('view-quiz').classList.add('hidden');
+            document.getElementById('view-summary').classList.add('hidden');
+            document.getElementById('view-home').classList.remove('hidden');
+
+            document.getElementById('btn-back-home').classList.add('hidden');
+            document.getElementById('btn-grid-drawer').classList.add('hidden');
+            document.getElementById('quiz-progress-bar-wrap').classList.add('hidden');
+
+            document.getElementById('header-title').textContent = 'Tin Học 10 • Giữa Kì I';
+            document.getElementById('header-subtitle').textContent = 'THPT Lương Thế Vinh (Đủ 179 câu)';
+
+            updateOverallStats();
+            renderLevelsList();
+        }
+
+        function renderCurrentQuestion() {
+            const qObj = currentLevel.questions[currentQIndex];
+            const total = currentLevel.questions.length;
+            const savedState = userProgress[currentLevel.id]?.[currentQIndex];
+
+            // Cuộn khung câu hỏi lên đầu trang
+            document.getElementById('question-stage').scrollTop = 0;
+
+            // Cập nhật Header Counter & Progress Bar
+            document.getElementById('header-q-counter').textContent = `${currentQIndex + 1}/${total}`;
+            const answeredCount = Object.values(userProgress[currentLevel.id] || {}).filter(x => x?.answered).length;
+            const pct = Math.round((answeredCount / total) * 100);
+            document.getElementById('quiz-progress-bar').style.width = `${pct}%`;
+
+            // Badge loại câu hỏi
+            const badgeType = document.getElementById('q-badge-type');
+            if (currentLevel.category === 'mcq') {
+                badgeType.textContent = `Trắc nghiệm 4 đáp án • Câu ${currentQIndex + 1}/${total}`;
+            } else if (currentLevel.category === 'tf') {
+                badgeType.textContent = `Đúng / Sai (4 ý) • Câu ${currentQIndex + 1}/${total}`;
+            } else {
+                badgeType.textContent = `Tự luận ôn tập • Câu ${currentQIndex + 1}/${total}`;
+            }
+
+            // Badge trạng thái
+            const statusBadge = document.getElementById('q-status-badge');
+            if (savedState && savedState.answered) {
+                if (savedState.isCorrect) {
+                    statusBadge.className = 'text-[11px] font-bold px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-700';
+                    statusBadge.innerHTML = '<i class="fa-solid fa-circle-check mr-1"></i>Chính xác';
+                } else {
+                    statusBadge.className = 'text-[11px] font-bold px-2.5 py-1 rounded-lg bg-rose-100 text-rose-700';
+                    statusBadge.innerHTML = currentLevel.category === 'tf'
+                        ? `<i class="fa-solid fa-circle-exclamation mr-1"></i>Đạt ${savedState.score} điểm`
+                        : '<i class="fa-solid fa-circle-xmark mr-1"></i>Chưa đúng';
+                }
+            } else {
+                statusBadge.className = 'text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-slate-200 text-slate-600';
+                statusBadge.textContent = 'Chưa trả lời';
+            }
+
+            // Nội dung câu hỏi
+            document.getElementById('q-text').innerText = qObj.q;
+
+            // Render vùng lựa chọn theo từng loại
+            const optionsContainer = document.getElementById('q-options-container');
+            const feedbackBox = document.getElementById('q-feedback-box');
+            const btnSubmitTF = document.getElementById('btn-submit-tf');
+            const btnRetryQ = document.getElementById('btn-retry-q');
+
+            optionsContainer.innerHTML = '';
+            feedbackBox.classList.add('hidden');
+            btnSubmitTF.classList.add('hidden');
+            btnRetryQ.classList.add('hidden');
+
+            if (currentLevel.category === 'mcq') {
+                renderMCQOptions(qObj, savedState, optionsContainer, feedbackBox);
+            } else if (currentLevel.category === 'tf') {
+                renderTFOptions(qObj, savedState, optionsContainer, feedbackBox, btnSubmitTF);
+            } else {
+                renderEssayCard(qObj, savedState, optionsContainer);
+            }
+
+            if (savedState && savedState.answered && currentLevel.category !== 'essay') {
+                btnRetryQ.classList.remove('hidden');
+            }
+
+            // Nút điều hướng Trước / Tiếp
+            document.getElementById('btn-prev-q').disabled = (currentQIndex === 0);
+            const nextLabel = document.getElementById('btn-next-label');
+            nextLabel.textContent = (currentQIndex === total - 1) ? 'Tổng kết' : 'Câu tiếp';
+        }
+
+        // ==================== 1. RENDER CÂU HỎI 4 ĐÁP ÁN ====================
+        function renderMCQOptions(qObj, savedState, container, feedbackBox) {
+            const letters = ['A', 'B', 'C', 'D'];
+            const isAnswered = savedState && savedState.answered;
+
+            qObj.options.forEach((optText, idx) => {
+                const btn = document.createElement('button');
+                btn.disabled = isAnswered;
+
+                let baseClass = 'option-btn w-full text-left p-3.5 rounded-2xl border flex items-start space-x-3 transition ';
+                let badgeClass = 'w-7 h-7 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 mt-0.5 ';
+
+                if (!isAnswered) {
+                    baseClass += 'bg-white border-slate-200 hover:border-indigo-400 active:bg-indigo-50 text-slate-700 shadow-sm';
+                    badgeClass += 'bg-slate-100 text-slate-700';
+                } else {
+                    if (idx === qObj.ans) {
+                        baseClass += 'bg-emerald-50 border-emerald-500 text-emerald-900 font-semibold shadow-sm';
+                        badgeClass += 'bg-emerald-600 text-white';
+                    } else if (idx === savedState.selected && idx !== qObj.ans) {
+                        baseClass += 'bg-rose-50 border-rose-400 text-rose-900';
+                        badgeClass += 'bg-rose-600 text-white';
+                    } else {
+                        baseClass += 'bg-white/60 border-slate-200 text-slate-400 opacity-75';
+                        badgeClass += 'bg-slate-100 text-slate-400';
+                    }
+                }
+
+                btn.className = baseClass;
+                btn.innerHTML = `
+                    <span class="${badgeClass}">${letters[idx]}</span>
+                    <span class="text-[14px] leading-snug flex-1">${optText}</span>
+                    ${isAnswered && idx === qObj.ans ? '<i class="fa-solid fa-check text-emerald-600 mt-1"></i>' : ''}
+                    ${isAnswered && idx === savedState.selected && idx !== qObj.ans ? '<i class="fa-solid fa-xmark text-rose-600 mt-1"></i>' : ''}
+                `;
+
+                btn.onclick = () => selectMCQAnswer(idx);
+                container.appendChild(btn);
+            });
+
+            if (isAnswered) {
+                feedbackBox.classList.remove('hidden');
+                if (savedState.isCorrect) {
+                    feedbackBox.className = 'p-3.5 rounded-2xl border bg-emerald-50 border-emerald-200 text-emerald-900 text-xs leading-relaxed animate-pop';
+                    feedbackBox.innerHTML = `<div class="font-bold text-emerald-700 mb-1"><i class="fa-solid fa-circle-check mr-1.5"></i>Chính xác! Đáp án đúng là ${letters[qObj.ans]}.</div><div>${qObj.exp}</div>`;
+                } else {
+                    feedbackBox.className = 'p-3.5 rounded-2xl border bg-rose-50 border-rose-200 text-rose-900 text-xs leading-relaxed animate-pop';
+                    feedbackBox.innerHTML = `<div class="font-bold text-rose-700 mb-1"><i class="fa-solid fa-circle-xmark mr-1.5"></i>Sai rồi! Đáp án đúng phải là ${letters[qObj.ans]}.</div><div>${qObj.exp}</div>`;
+                }
+            }
+        }
+
+        function selectMCQAnswer(selectedIndex) {
+            const qObj = currentLevel.questions[currentQIndex];
+            const isCorrect = (selectedIndex === qObj.ans);
+
+            userProgress[currentLevel.id][currentQIndex] = {
+                answered: true,
+                isCorrect: isCorrect,
+                selected: selectedIndex,
+                score: isCorrect ? 1 : 0
+            };
+            saveProgress();
+            renderCurrentQuestion();
+        }
+
+        // ==================== 2. RENDER CÂU HỎI ĐÚNG / SAI (4 Ý) ====================
+        function renderTFOptions(qObj, savedState, container, feedbackBox, btnSubmitTF) {
+            const isAnswered = savedState && savedState.answered;
+            if (!isAnswered && !tempTFSelection[currentQIndex]) {
+                tempTFSelection[currentQIndex] = {};
+            }
+            const currentChoices = isAnswered ? savedState.selected : (tempTFSelection[currentQIndex] || {});
+
+            qObj.statements.forEach((st, idx) => {
+                const row = document.createElement('div');
+                const userChoice = currentChoices[idx]; // true / false / undefined
+                const isStatementCorrect = isAnswered && (userChoice === st.ans);
+
+                let borderClass = 'border-slate-200 bg-white';
+                if (isAnswered) {
+                    borderClass = isStatementCorrect ? 'border-emerald-400 bg-emerald-50/60' : 'border-rose-400 bg-rose-50/60';
+                }
+
+                row.className = `p-3 rounded-2xl border ${borderClass} shadow-sm space-y-2`;
+
+                const btnTrueClass = (userChoice === true)
+                    ? (isAnswered ? (st.ans === true ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white') : 'bg-indigo-600 text-white')
+                    : 'bg-slate-100 text-slate-600';
+
+                const btnFalseClass = (userChoice === false)
+                    ? (isAnswered ? (st.ans === false ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white') : 'bg-indigo-600 text-white')
+                    : 'bg-slate-100 text-slate-600';
+
+                row.innerHTML = `
+                    <div class="flex items-start justify-between gap-2">
+                        <span class="text-xs font-semibold text-slate-800 leading-snug flex-1">
+                            <strong class="text-indigo-600 mr-1">${st.label})</strong> ${st.text}
+                        </span>
+                        ${isAnswered ? `
+                            <span class="text-[11px] font-bold px-2 py-0.5 rounded-md shrink-0 ${isStatementCorrect ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
+                                Đáp án: ${st.ans ? 'Đúng' : 'Sai'}
+                            </span>
+                        ` : ''}
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 pt-1">
+                        <button ${isAnswered ? 'disabled' : ''} onclick="chooseTFStatement(${idx}, true)" class="py-2 rounded-xl font-bold text-xs transition ${btnTrueClass}">
+                            <i class="fa-solid fa-check mr-1"></i>Đúng
+                        </button>
+                        <button ${isAnswered ? 'disabled' : ''} onclick="chooseTFStatement(${idx}, false)" class="py-2 rounded-xl font-bold text-xs transition ${btnFalseClass}">
+                            <i class="fa-solid fa-xmark mr-1"></i>Sai
+                        </button>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+
+            if (!isAnswered) {
+                btnSubmitTF.classList.remove('hidden');
+                const chosenCount = Object.keys(currentChoices).length;
+                btnSubmitTF.textContent = chosenCount < 4 ? `Chọn đủ 4 ý (${chosenCount}/4)` : 'Kiểm tra Đúng / Sai';
+                btnSubmitTF.disabled = (chosenCount < 4);
+                btnSubmitTF.className = chosenCount < 4
+                    ? 'flex-1 py-3 rounded-xl bg-slate-200 text-slate-500 font-bold text-xs transition'
+                    : 'flex-1 py-3 rounded-xl bg-emerald-600 text-white font-bold text-xs shadow-md shadow-emerald-200 active:bg-emerald-700 transition';
+            } else {
+                feedbackBox.classList.remove('hidden');
+                feedbackBox.className = savedState.isCorrect
+                    ? 'p-3.5 rounded-2xl border bg-emerald-50 border-emerald-200 text-emerald-900 text-xs leading-relaxed animate-pop'
+                    : 'p-3.5 rounded-2xl border bg-amber-50 border-amber-200 text-amber-900 text-xs leading-relaxed animate-pop';
+
+                feedbackBox.innerHTML = `
+                    <div class="font-bold mb-1">
+                        <i class="fa-solid fa-star mr-1"></i>Bạn trả lời đúng ${savedState.correctCount}/4 ý — Đạt ${savedState.score} điểm!
+                    </div>
+                    <div>${qObj.exp}</div>
+                `;
+            }
+        }
+
+        function chooseTFStatement(stmtIndex, val) {
+            if (!tempTFSelection[currentQIndex]) tempTFSelection[currentQIndex] = {};
+            tempTFSelection[currentQIndex][stmtIndex] = val;
+            renderCurrentQuestion();
+        }
+
+        function submitTrueFalseQuestion() {
+            const qObj = currentLevel.questions[currentQIndex];
+            const choices = tempTFSelection[currentQIndex] || {};
+            if (Object.keys(choices).length < 4) return;
+
+            let correctCount = 0;
+            qObj.statements.forEach((st, idx) => {
+                if (choices[idx] === st.ans) correctCount++;
+            });
+
+            // Thang điểm quy định trong đề cương: 1 ý = 0.25đ, 2 ý = 0.5đ, 3 ý = 0.75đ, 4 ý = 1.0đ
+            const scoreMap = { 0: 0, 1: 0.25, 2: 0.5, 3: 0.75, 4: 1 };
+            const score = scoreMap[correctCount] || 0;
+
+            userProgress[currentLevel.id][currentQIndex] = {
+                answered: true,
+                isCorrect: (correctCount === 4),
+                correctCount: correctCount,
+                selected: { ...choices },
+                score: score
+            };
+            saveProgress();
+            renderCurrentQuestion();
+        }
+
+        // ==================== 3. RENDER CÂU HỎI TỰ LUẬN ====================
+        function renderEssayCard(qObj, savedState, container) {
+            const isRevealed = savedState && savedState.answered;
+
+            const box = document.createElement('div');
+            box.className = 'space-y-3';
+            box.innerHTML = `
+                <button onclick="toggleEssayAnswer()" class="w-full py-3.5 px-4 rounded-2xl font-bold text-xs flex items-center justify-center space-x-2 transition ${isRevealed ? 'bg-slate-200 text-slate-700' : 'bg-indigo-600 text-white shadow-md shadow-indigo-200'}">
+                    <i class="fa-solid ${isRevealed ? 'fa-eye-slash' : 'fa-eye'}"></i>
+                    <span>${isRevealed ? 'Ẩn lời giải chi tiết' : 'Xem Đáp Án Chuẩn Đề Cương'}</span>
+                </button>
+                <div class="${isRevealed ? '' : 'hidden'} bg-emerald-50 border border-emerald-200 p-4 rounded-2xl text-slate-800 text-xs leading-relaxed whitespace-pre-line animate-pop select-text">${qObj.answer}</div>
+            `;
+            container.appendChild(box);
+        }
+
+        function toggleEssayAnswer() {
+            const cur = userProgress[currentLevel.id][currentQIndex];
+            userProgress[currentLevel.id][currentQIndex] = {
+                answered: !(cur && cur.answered),
+                isCorrect: true,
+                score: 1
+            };
+            saveProgress();
+            renderCurrentQuestion();
+        }
+
+        // ==================== CHUYỂN CÂU & LÀM LẠI CÂU ====================
+        function navigateQuestion(delta) {
+            const total = currentLevel.questions.length;
+            const nextIndex = currentQIndex + delta;
+
+            if (nextIndex < 0) return;
+            if (nextIndex >= total) {
+                showLevelSummary();
+                return;
+            }
+            currentQIndex = nextIndex;
+            renderCurrentQuestion();
+        }
+
+        function retryCurrentQuestion() {
+            if (userProgress[currentLevel.id]) {
+                delete userProgress[currentLevel.id][currentQIndex];
+            }
+            delete tempTFSelection[currentQIndex];
+            saveProgress();
+            renderCurrentQuestion();
+        }
+
+        // ==================== TỔNG KẾT LEVEL ====================
+        function showLevelSummary() {
+            document.getElementById('view-quiz').classList.add('hidden');
+            document.getElementById('view-summary').classList.remove('hidden');
+
+            const total = currentLevel.questions.length;
+            const lvlProg = userProgress[currentLevel.id] || {};
+            let correctCount = 0;
+            let totalScore = 0;
+
+            Object.values(lvlProg).forEach(item => {
+                if (item && item.answered) {
+                    if (item.isCorrect) correctCount++;
+                    totalScore += (item.score !== undefined ? item.score : (item.isCorrect ? 1 : 0));
+                }
+            });
+
+            document.getElementById('summary-subtitle').textContent = `${currentLevel.levelBadge} • ${currentLevel.title}`;
+            document.getElementById('sum-total').textContent = total;
+            document.getElementById('sum-correct').textContent = `${correctCount}/${total}`;
+            document.getElementById('sum-score').textContent = `${totalScore.toFixed(2).replace(/\.00$/, '')}/${total}`;
+        }
+
+        function resetCurrentLevel() {
+            if (!currentLevel) return;
+            userProgress[currentLevel.id] = {};
+            tempTFSelection = {};
+            saveProgress();
+            startLevel(currentLevel.id);
+        }
+
+        // ==================== DRAWER CHỌN NHANH CÂU HỎI ====================
+        function toggleQuestionGrid() {
+            const drawer = document.getElementById('drawer-grid');
+            if (drawer.classList.contains('hidden')) {
+                renderQuestionGridNumbers();
+                drawer.classList.remove('hidden');
+            } else {
+                drawer.classList.add('hidden');
+            }
+        }
+
+        function renderQuestionGridNumbers() {
+            const grid = document.getElementById('grid-numbers');
+            grid.innerHTML = '';
+            const lvlProg = userProgress[currentLevel.id] || {};
+
+            currentLevel.questions.forEach((_, idx) => {
+                const st = lvlProg[idx];
+                const btn = document.createElement('button');
+                let cls = 'h-10 rounded-xl font-bold text-xs flex items-center justify-center border transition ';
+
+                if (idx === currentQIndex) {
+                    cls += 'ring-2 ring-indigo-600 ring-offset-1 ';
+                }
+
+                if (!st || !st.answered) {
+                    cls += 'bg-slate-100 text-slate-700 border-slate-200';
+                } else if (st.isCorrect) {
+                    cls += 'bg-emerald-500 text-white border-emerald-600';
+                } else {
+                    cls += 'bg-rose-500 text-white border-rose-600';
+                }
+
+                btn.className = cls;
+                btn.textContent = idx + 1;
+                btn.onclick = () => {
+                    currentQIndex = idx;
+                    toggleQuestionGrid();
+                    renderCurrentQuestion();
+                };
+                grid.appendChild(btn);
+            });
+        }
+
+        // ==================== RESET TOÀN BỘ TIẾN ĐỘ ====================
+        function confirmResetProgress() {
+            document.getElementById('modal-reset').classList.remove('hidden');
+        }
+
+        function closeResetModal() {
+            document.getElementById('modal-reset').classList.add('hidden');
+        }
+
+        function executeResetAll() {
+            userProgress = {};
+            tempTFSelection = {};
+            saveProgress();
+            closeResetModal();
+            showHome();
+        }
+
+        // Hỗ trợ vuốt trái/phải trên màn hình câu hỏi cho điện thoại
+        let touchStartX = 0;
+        let touchEndX = 0;
+        const quizStage = document.getElementById('question-stage');
+        quizStage.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        quizStage.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            const diff = touchStartX - touchEndX;
+            if (Math.abs(diff) > 75) {
+                if (diff > 0) navigateQuestion(1); // Vuốt sang trái -> Câu tiếp
+                else navigateQuestion(-1);         // Vuốt sang phải -> Câu trước
+            }
+        }, { passive: true });
+
+        // Khởi chạy ứng dụng
+        window.onload = () => {
+            loadProgress();
+            updateOverallStats();
+            renderLevelsList();
+        };
+    </script>
+</body>
+</html>
